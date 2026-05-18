@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "lucide-react";
@@ -23,21 +24,16 @@ export default function LoginPage() {
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#071f5f] px-6">
-      {/* Background pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(53,97,171,0.45),rgba(4,22,72,0.98))]" />
+      {/* Background image */}
+      <Image
+        src="/njis-login-bg.png"
+        alt="NJIS background"
+        fill
+        priority
+        className="object-cover"
+      />
 
-      <div className="absolute inset-0 opacity-20">
-        <div className="grid h-full w-full grid-cols-3 gap-20 p-10 md:grid-cols-5">
-          {Array.from({ length: 20 }).map((_, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-center text-[170px] font-extrabold text-white/30"
-            >
-              NJ
-            </div>
-          ))}
-        </div>
-      </div>
+      <div className="absolute inset-0 bg-[#061b54]/20" />
 
       {/* Login card */}
       <form
@@ -51,18 +47,16 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Logo text */}
-        <div className="absolute right-9 top-8 text-right">
-          <div className="relative inline-block">
-            <div className="absolute -right-2 -top-2 h-5 w-5 rotate-45 bg-red-600" />
-            <div className="absolute -right-5 top-1 h-5 w-5 rotate-45 bg-blue-600" />
-            <h1 className="text-4xl font-serif font-bold tracking-wide text-[#173d79]">
-              NJIS
-            </h1>
-          </div>
-          <p className="mt-1 text-[7px] font-semibold uppercase tracking-wide text-[#173d79]">
-            North Jakarta Intercultural School
-          </p>
+        {/* Logo */}
+        <div className="absolute right-8 top-8">
+          <Image
+            src="/njis-logo.png"
+            alt="NJIS logo"
+            width={130}
+            height={70}
+            priority
+            className="h-auto w-[130px]"
+          />
         </div>
 
         <div className="mx-auto flex max-w-[440px] flex-col gap-6">
