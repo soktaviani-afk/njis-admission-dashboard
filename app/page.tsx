@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import React, {
+import {
   useEffect,
   useState,
 } from "react";
