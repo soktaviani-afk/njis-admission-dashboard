@@ -19,17 +19,22 @@ export default function LoginPage() {
   ) {
     event.preventDefault();
 
-    if (!username || !password) {
-      alert(
-        "Please enter username and password"
-      );
-      return;
-    }
+if (
+  username === "admin" &&
+  password === "njis2026"
+) {
+  localStorage.setItem(
+    "njis-auth",
+    "true"
+  );
 
-    router.push(
-      "/enrollment-status"
-    );
-  }
+  router.push("/homepage");
+} else {
+  alert(
+    "Invalid username or password"
+  );
+}
+}
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#071f5f] px-6">

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+
 import {
   useEffect,
   useMemo,
@@ -15,21 +16,35 @@ import {
   Tooltip,
 } from "recharts";
 
-import { Plus_Jakarta_Sans } from "next/font/google";
+import {
+  Plus_Jakarta_Sans,
+} from "next/font/google";
+
+import { useRouter } from "next/navigation";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: [
+    "400",
+    "500",
+    "600",
+    "700",
+    "800",
+  ],
 });
 
 const menuItems = [
   {
-    name: "Student Exit Analysis",
-    path: "/student-exit",
+    name: "Homepage",
+    path: "/homepage",
   },
   {
     name: "Enrollment Status",
     path: "/enrollment-status",
+  },
+  {
+    name: "Student Exit Analysis",
+    path: "/student-exit",
   },
 ];
 

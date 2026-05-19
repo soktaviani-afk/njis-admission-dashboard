@@ -1,8 +1,16 @@
 "use client";
 
 import Image from "next/image";
+
 import Link from "next/link";
-import { useEffect, useState } from "react";
+
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import { useRouter } from "next/navigation";
+
 import { Plus_Jakarta_Sans } from "next/font/google";
 
 import {
@@ -14,17 +22,41 @@ import {
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: [
+    "400",
+    "500",
+    "600",
+    "700",
+    "800",
+  ],
 });
+
+export default function StudentExit() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const isAuthenticated =
+      localStorage.getItem(
+        "njis-auth"
+      );
+
+    if (!isAuthenticated) {
+      router.push("/");
+    }
+  }, [router]);
 
 const menuItems = [
   {
-    name: "Student Exit Analysis",
-    path: "/student-exit",
+    name: "Homepage",
+    path: "/homepage",
   },
   {
     name: "Enrollment Status",
     path: "/enrollment-status",
+  },
+  {
+    name: "Student Exit Analysis",
+    path: "/student-exit",
   },
 ];
 
@@ -53,8 +85,7 @@ const REASON_COLORS: Record<string, string> = {
 
 const TOTAL_STUDENTS = 1200;
 
-export default function Home() {
-  const [exitData, setExitData] =
+const [exitData, setExitData] =
     useState<StudentExit[]>([]);
 
   const [loading, setLoading] =
