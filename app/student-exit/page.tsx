@@ -1,7 +1,7 @@
 "use client";
 
-import Sidebar from "../components/layout/sidebar";
-import StatCard from "../components/cards/stat-card";
+import Sidebar from "@/components/layout/sidebar";
+import StatCard from "@/components/cards/stat-card";
 
 import { useEffect, useState } from "react";
 
@@ -40,14 +40,28 @@ type ReasonData = {
   value: number;
 };
 
-const REASON_COLORS: Record<string, string> = {
-  "Not happy with our program": "#DC2626",
+const REASON_COLORS: Record<
+  string,
+  string
+> = {
+  "Not happy with our program":
+    "#DC2626",
+
   Relocation: "#2563EB",
-  "Prefer non IB curriculum": "#F59E0B",
-  "Bigger Community": "#10B981",
-  "Wants a religion based school": "#7C3AED",
+
+  "Prefer non IB curriculum":
+    "#F59E0B",
+
+  "Bigger Community":
+    "#10B981",
+
+  "Wants a religion based school":
+    "#7C3AED",
+
   Graduates: "#0EA5E9",
-  "Price Sensitive": "#EC4899",
+
+  "Price Sensitive":
+    "#EC4899",
 };
 
 const TOTAL_STUDENTS = 1200;
@@ -69,7 +83,9 @@ export default function StudentExit() {
 
   useEffect(() => {
     const isAuthenticated =
-      localStorage.getItem("njis-auth");
+      localStorage.getItem(
+        "njis-auth"
+      );
 
     if (!isAuthenticated) {
       router.push("/");
@@ -106,15 +122,19 @@ export default function StudentExit() {
       fetchSpreadsheetData();
     }, 60000);
 
-    return () => clearInterval(interval);
+    return () =>
+      clearInterval(interval);
   }, []);
 
   const academicYears = [
     "All Years",
+
     ...new Set(
       exitData.map(
         (student) =>
-          student["Academic Year"]
+          student[
+            "Academic Year"
+          ]
       )
     ),
   ];
@@ -124,26 +144,33 @@ export default function StudentExit() {
       ? exitData
       : exitData.filter(
           (student) =>
-            student["Academic Year"] ===
-            selectedYear
+            student[
+              "Academic Year"
+            ] === selectedYear
         );
 
   const searchedData =
-    filteredData.filter((student) =>
-      student["Student Name"]
-        ?.toLowerCase()
-        .includes(search.toLowerCase())
+    filteredData.filter(
+      (student) =>
+        student[
+          "Student Name"
+        ]
+          ?.toLowerCase()
+          .includes(
+            search.toLowerCase()
+          )
     );
 
   const gradeData = Object.entries(
-    filteredData.reduce(
+    searchedData.reduce(
       (
         acc: Record<string, number>,
         student
       ) => {
         const grade =
-          student["Grade Level"] ||
-          "Unknown";
+          student[
+            "Grade Level"
+          ] || "Unknown";
 
         acc[grade] =
           (acc[grade] || 0) + 1;
@@ -161,7 +188,7 @@ export default function StudentExit() {
 
   const reasonData: ReasonData[] =
     Object.entries(
-      filteredData.reduce(
+      searchedData.reduce(
         (
           acc: Record<string, number>,
           student
@@ -184,7 +211,7 @@ export default function StudentExit() {
     }));
 
   const totalExits =
-    filteredData.length;
+    searchedData.length;
 
   const topReason =
     [...reasonData].sort(
@@ -224,9 +251,10 @@ export default function StudentExit() {
             </h2>
 
             <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-500">
-              Monitor student exit trends
-              and retention insights with
-              live spreadsheet integration.
+              Monitor student exit
+              trends and retention
+              insights with live
+              spreadsheet integration.
             </p>
           </div>
 
@@ -236,7 +264,9 @@ export default function StudentExit() {
               placeholder="Search student..."
               value={search}
               onChange={(e) =>
-                setSearch(e.target.value)
+                setSearch(
+                  e.target.value
+                )
               }
               className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
             />
@@ -250,46 +280,64 @@ export default function StudentExit() {
               }
               className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
             >
-              {academicYears.map((year) => (
-                <option
-                  key={year}
-                  value={year}
-                >
-                  {year}
-                </option>
-              ))}
+              {academicYears.map(
+                (year) => (
+                  <option
+                    key={year}
+                    value={year}
+                  >
+                    {year}
+                  </option>
+                )
+              )}
             </select>
           </div>
         </div>
 
         {/* KPI Cards */}
-        <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            title="Total Exits"
-            value={String(totalExits)}
-          />
+        {loading ? (
+          <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {[1, 2, 3, 4].map(
+              (item) => (
+                <div
+                  key={item}
+                  className="h-36 animate-pulse rounded-[28px] bg-slate-200"
+                />
+              )
+            )}
+          </div>
+        ) : (
+          <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              title="Total Exits"
+              value={String(
+                totalExits
+              )}
+            />
 
-          <StatCard
-            title="Retention Rate"
-            value={`${retentionRate}%`}
-          />
+            <StatCard
+              title="Retention Rate"
+              value={`${retentionRate}%`}
+            />
 
-          <StatCard
-            title="Top Reason"
-            value={topReason}
-          />
+            <StatCard
+              title="Top Reason"
+              value={topReason}
+            />
 
-          <StatCard
-            title="Most Affected Grade"
-            value={`Grade ${mostAffectedGrade}`}
-          />
-        </div>
+            <StatCard
+              title="Most Affected Grade"
+              value={`Grade ${mostAffectedGrade}`}
+            />
+          </div>
+        )}
 
         {/* Analytics */}
         <section className="mt-10 grid grid-cols-1 gap-8 xl:grid-cols-3">
           <div className="rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm xl:col-span-2">
             <h3 className="text-3xl font-bold text-[#071739]">
-              Exit Reasons Analytics
+              Exit Reasons
+              Analytics
             </h3>
 
             <div className="mt-10 flex flex-col items-center">
@@ -306,13 +354,17 @@ export default function StudentExit() {
                   dataKey="value"
                 >
                   {reasonData.map(
-                    (entry, index) => (
+                    (
+                      entry,
+                      index
+                    ) => (
                       <Cell
                         key={index}
                         fill={
                           REASON_COLORS[
                             entry.name.trim()
-                          ] || "#94A3B8"
+                          ] ||
+                          "#94A3B8"
                         }
                       />
                     )
@@ -321,30 +373,39 @@ export default function StudentExit() {
 
                 <Tooltip />
               </PieChart>
+
+              <div className="mt-8 flex flex-wrap justify-center gap-5">
+                {reasonData.map(
+                  (
+                    item,
+                    index
+                  ) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2"
+                    >
+                      <div
+                        className="h-4 w-4 rounded-full"
+                        style={{
+                          backgroundColor:
+                            REASON_COLORS[
+                              item.name.trim()
+                            ] ||
+                            "#94A3B8",
+                        }}
+                      />
+
+                      <span className="text-sm font-semibold text-slate-700">
+                        {item.name}
+                      </span>
+                    </div>
+                  )
+                )}
+              </div>
             </div>
           </div>
         </section>
       </main>
-    </div>
-  );
-}
-
-function StatCard({
-  title,
-  value,
-}: {
-  title: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-[28px] border border-white bg-white/90 p-6 shadow-[0_10px_40px_rgba(15,23,42,0.06)] backdrop-blur-sm">
-      <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-        {title}
-      </p>
-
-      <h3 className="mt-4 text-4xl font-extrabold tracking-tight text-[#071739]">
-        {value}
-      </h3>
     </div>
   );
 }
