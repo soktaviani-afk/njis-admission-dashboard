@@ -511,7 +511,329 @@ export default function EnrollmentStatus() {
             </div>
           </div>
         </section>
+      
+      {/* Needs Attention */}
+{filteredData.filter(
+  (student) =>
+    student[
+      "Documents Status"
+    ] !== "Complete" ||
+    student[
+      "Onboarding Status"
+    ] !== "Complete"
+).length > 0 && (
+  <section className="mt-10 rounded-[32px] border border-red-100 bg-red-50/60 p-8 shadow-sm">
+    <div className="flex items-center justify-between">
+      <div>
+        <h3 className="text-2xl font-bold text-red-700">
+          Needs Attention
+        </h3>
+
+        <p className="mt-2 text-sm text-red-500">
+          Students with incomplete
+          documents or onboarding.
+        </p>
+      </div>
+    </div>
+
+    <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {filteredData
+        .filter(
+          (student) =>
+            student[
+              "Documents Status"
+            ] !== "Complete" ||
+            student[
+              "Onboarding Status"
+            ] !== "Complete"
+        )
+        .slice(0, 4)
+        .map((student, index) => (
+          <div
+            key={index}
+            onClick={() =>
+              setSelectedStudent(
+                student
+              )
+            }
+            className="cursor-pointer rounded-2xl border border-red-100 bg-white p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-bold text-[#071739]">
+                  {
+                    student[
+                      "Student Name"
+                    ]
+                  }
+                </h4>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  Grade{" "}
+                  {
+                    student[
+                      "Grade Applying"
+                    ]
+                  }
+                </p>
+              </div>
+
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-bold ${
+                  STAGE_STYLES[
+                    student[
+                      "Current Stage"
+                    ]
+                  ] ||
+                  "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {
+                  student[
+                    "Current Stage"
+                  ]
+                }
+              </span>
+            </div>
+          </div>
+        ))}
+    </div>
+  </section>
+)}
+
+{/* Enrollment Table */}
+<section className="mt-10 rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm">
+  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <div>
+      <h3 className="text-3xl font-bold text-[#071739]">
+        Enrollment Records
+      </h3>
+
+      <p className="mt-2 text-sm text-slate-500">
+        Live spreadsheet synced
+        enrollment records.
+      </p>
+    </div>
+  </div>
+
+  <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-100">
+    <table className="min-w-full text-sm">
+      <thead>
+        <tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-500">
+          <th className="px-5 py-4 font-bold">
+            Student Name
+          </th>
+
+          <th className="px-5 py-4 font-bold">
+            Grade
+          </th>
+
+          <th className="px-5 py-4 font-bold">
+            Current Stage
+          </th>
+
+          <th className="px-5 py-4 font-bold">
+            Documents
+          </th>
+
+          <th className="px-5 py-4 font-bold">
+            Onboarding
+          </th>
+
+          <th className="px-5 py-4 font-bold">
+            PIC
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {filteredData.map(
+          (student, index) => (
+            <tr
+              key={index}
+              onClick={() =>
+                setSelectedStudent(
+                  student
+                )
+              }
+              className="cursor-pointer border-b border-slate-100 transition hover:bg-blue-50"
+            >
+              <td className="px-5 py-4 font-medium text-[#071739]">
+                {
+                  student[
+                    "Student Name"
+                  ]
+                }
+              </td>
+
+              <td className="px-5 py-4">
+                {
+                  student[
+                    "Grade Applying"
+                  ]
+                }
+              </td>
+
+              <td className="px-5 py-4">
+                <span
+                  className={`rounded-full px-3 py-1 text-sm font-semibold ${
+                    STAGE_STYLES[
+                      student[
+                        "Current Stage"
+                      ]
+                    ]
+                  }`}
+                >
+                  {
+                    student[
+                      "Current Stage"
+                    ]
+                  }
+                </span>
+              </td>
+
+              <td className="px-5 py-4">
+                {
+                  student[
+                    "Documents Status"
+                  ]
+                }
+              </td>
+
+              <td className="px-5 py-4">
+                {
+                  student[
+                    "Onboarding Status"
+                  ]
+                }
+              </td>
+
+              <td className="px-5 py-4">
+                {student["PIC"]}
+              </td>
+            </tr>
+          )
+        )}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{/* Student Detail Modal */}
+{selectedStudent && (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+    onClick={() =>
+      setSelectedStudent(null)
+    }
+  >
+    <div
+      className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[32px] bg-white p-8 shadow-2xl"
+      onClick={(e) =>
+        e.stopPropagation()
+      }
+    >
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-3xl font-extrabold text-[#071739]">
+            {
+              selectedStudent[
+                "Student Name"
+              ]
+            }
+          </h2>
+
+          <p className="mt-2 text-slate-500">
+            Grade{" "}
+            {
+              selectedStudent[
+                "Grade Applying"
+              ]
+            }
+          </p>
+        </div>
+
+        <button
+          onClick={() =>
+            setSelectedStudent(null)
+          }
+          className="rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600"
+        >
+          Close
+        </button>
+      </div>
+
+      <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2">
+        <DetailCard
+          title="Current Stage"
+          value={
+            selectedStudent[
+              "Current Stage"
+            ]
+          }
+        />
+
+        <DetailCard
+          title="Documents"
+          value={
+            selectedStudent[
+              "Documents Status"
+            ]
+          }
+        />
+
+        <DetailCard
+          title="Onboarding"
+          value={
+            selectedStudent[
+              "Onboarding Status"
+            ]
+          }
+        />
+
+        <DetailCard
+          title="PIC"
+          value={
+            selectedStudent["PIC"]
+          }
+        />
+      </div>
+
+      <div className="mt-8 rounded-2xl bg-slate-50 p-5">
+        <p className="text-sm font-bold uppercase tracking-wide text-slate-400">
+          Notes
+        </p>
+
+        <p className="mt-3 text-sm text-slate-600">
+          {selectedStudent[
+            "Notes"
+          ] || "No notes available."}
+        </p>
+      </div>
+    </div>
+  </div>
+)}
       </main>
+    </div>
+  );
+}
+
+function DetailCard({
+  title,
+  value,
+}: {
+  title: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+      <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+        {title}
+      </p>
+
+      <p className="mt-2 text-sm font-semibold text-[#071739]">
+        {value || "-"}
+      </p>
     </div>
   );
 }
