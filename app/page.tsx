@@ -70,9 +70,9 @@ export default function LoginPage() {
 <Image
   src="/njis-logo.png"
   alt="NJIS Logo"
-  width={38}
-  height={38}
-  className="h-10 w-10 rounded-xl bg-white object-contain p-2 shadow-md"
+  width={60}
+  height={60}
+  className="h-14 w-14 rounded-xl bg-white object-contain p-2 shadow-md"
 />
         </div>
 
