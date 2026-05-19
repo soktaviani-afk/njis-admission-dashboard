@@ -1,15 +1,21 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Plus_Jakarta_Sans } from "next/font/google";
+
 import {
   PieChart,
   Pie,
   Cell,
   Tooltip,
 } from "recharts";
-import Link from "next/link";
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
 
 const menuItems = [
   {
@@ -21,39 +27,44 @@ const menuItems = [
     path: "/enrollment-status",
   },
 ];
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
 
 type StudentExit = {
-  "Student ID": string;
   "Student Name": string;
   "Grade Level": string;
   "Academic Year": string;
-  "Exit Date": string;
   "Reason for Leaving": string;
-  "Destination School": string;
   Notes: string;
 };
 
-const REASON_COLORS: Record<string, string> = {
-  "Not happy with our program": "#DC2626", // red
-  Relocation: "#2563EB", // blue
-  "Prefer non IB curriculum": "#F59E0B", // amber
-  "Bigger Community": "#10B981", // green
-  "Wants a religion based school": "#7C3AED", // purple
-  "Graduates": "#0EA5E9", // sky blue
-  "Price Sensitive": "#EC4899", // pink
+type ReasonData = {
+  name: string;
+  value: number;
 };
 
+const REASON_COLORS: Record<string, string> = {
+  "Not happy with our program": "#DC2626",
+  Relocation: "#2563EB",
+  "Prefer non IB curriculum": "#F59E0B",
+  "Bigger Community": "#10B981",
+  "Wants a religion based school": "#7C3AED",
+  Graduates: "#0EA5E9",
+  "Price Sensitive": "#EC4899",
+};
+
+const TOTAL_STUDENTS = 1200;
+
 export default function Home() {
-  const [exitData, setExitData] = useState<StudentExit[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [exitData, setExitData] =
+    useState<StudentExit[]>([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
   const [selectedYear, setSelectedYear] =
     useState("All Years");
 
-
+  const [search, setSearch] =
+    useState("");
 
   useEffect(() => {
     async function fetchSpreadsheetData() {
@@ -83,7 +94,7 @@ export default function Home() {
 
     const interval = setInterval(() => {
       fetchSpreadsheetData();
-    }, 10000);
+    }, 60000);
 
     return () => clearInterval(interval);
   }, []);
@@ -107,9 +118,19 @@ export default function Home() {
             selectedYear
         );
 
+  const searchedData =
+    filteredData.filter((student) =>
+      student["Student Name"]
+        ?.toLowerCase()
+        .includes(search.toLowerCase())
+    );
+
   const gradeData = Object.entries(
     filteredData.reduce(
-      (acc: any, student: any) => {
+      (
+        acc: Record<string, number>,
+        student: StudentExit
+      ) => {
         const grade =
           student["Grade Level"] ||
           "Unknown";
@@ -124,61 +145,72 @@ export default function Home() {
   );
 
   const mostAffectedGrade =
-    gradeData.sort(
-      (a: any, b: any) => b[1] - a[1]
+    [...gradeData].sort(
+      (a, b) => b[1] - a[1]
     )[0]?.[0] || "-";
 
-  const reasonData = Object.entries(
-    filteredData.reduce(
-      (acc: any, student: any) => {
-        const reason =
-          student["Reason for Leaving"] ||
-          "Unknown";
+  const reasonData: ReasonData[] =
+    Object.entries(
+      filteredData.reduce(
+        (
+          acc: Record<string, number>,
+          student: StudentExit
+        ) => {
+          const reason =
+            student[
+              "Reason for Leaving"
+            ] || "Unknown";
 
-        acc[reason] =
-          (acc[reason] || 0) + 1;
+          acc[reason] =
+            (acc[reason] || 0) + 1;
 
-        return acc;
-      },
-      {}
-    )
-  ).map(([name, value]) => ({
-    name,
-    value,
-  }));
-const totalExits = filteredData.length;
+          return acc;
+        },
+        {}
+      )
+    ).map(([name, value]) => ({
+      name,
+      value,
+    }));
 
-const topReason =
-  [...reasonData].sort(
-    (a: any, b: any) => b.value - a.value
-  )[0]?.name || "-";
+  const totalExits =
+    filteredData.length;
 
-const retentionRate = (
-  100 -
-  (totalExits /
-    (totalExits + 1200)) *
-    100
-).toFixed(1);
+  const topReason =
+    [...reasonData].sort(
+      (a, b) => b.value - a.value
+    )[0]?.name || "-";
+
+  const retentionRate = (
+    100 -
+    (totalExits /
+      TOTAL_STUDENTS) *
+      100
+  ).toFixed(1);
+
   return (
     <div
-      className={`${jakarta.className} min-h-screen bg-gradient-to-br from-white via-slate-50 to-slate-100 flex relative overflow-hidden`}
+      className={`${jakarta.className} relative flex min-h-screen overflow-hidden bg-gradient-to-br from-white via-slate-50 to-slate-100`}
     >
       {/* Background Glow */}
-      <div className="absolute right-0 top-0 h-[350px] w-[350px] rounded-full bg-blue-200 blur-3xl opacity-20" />
+      <div className="absolute right-0 top-0 h-[350px] w-[350px] rounded-full bg-blue-200 opacity-20 blur-3xl" />
 
-      <div className="absolute left-20 top-40 h-[250px] w-[250px] rounded-full bg-slate-300 blur-3xl opacity-20" />
+      <div className="absolute left-20 top-40 h-[250px] w-[250px] rounded-full bg-slate-300 opacity-20 blur-3xl" />
 
       {/* Sidebar */}
-      <aside className="hidden md:flex w-72 flex-col bg-[#071739] text-white p-6 border-r border-white/10 shadow-2xl z-10">
+      <aside className="z-10 hidden w-72 flex-col border-r border-white/10 bg-[#071739] p-6 text-white shadow-2xl md:flex">
         <div className="flex items-center gap-4">
-          <Image
-            src="/njis-logo.png"
-            alt="NJIS Logo"
-            width={52}
-            height={52}
-            className="rounded-xl bg-white p-2"
-          />
-
+<Image
+  src="/njis-logo.png"
+  alt="NJIS Logo"
+  width={52}
+  height={52}
+  style={{
+    width: "auto",
+    height: "auto",
+  }}
+  className="rounded-xl bg-white p-2"
+/>
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight">
               NJIS
@@ -190,31 +222,34 @@ const retentionRate = (
           </div>
         </div>
 
-<nav className="mt-12 space-y-3">
-  {menuItems.map((item, index) => (
-    <Link
-      key={index}
-      href={item.path}
-      className={`block w-full rounded-2xl px-4 py-3 text-left text-sm font-medium transition-all duration-300 ${
-        item.name ===
-        "Student Exit Analysis"
-          ? "bg-white text-[#071739] shadow-xl"
-          : "text-slate-300 hover:bg-white/10 hover:text-white"
-      }`}
-    >
-      {item.name}
-    </Link>
-  ))}
-</nav>
+        <nav className="mt-12 space-y-3">
+          {menuItems.map(
+            (item, index) => (
+              <Link
+                key={index}
+                href={item.path}
+                className={`block w-full rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
+                  item.name ===
+                  "Student Exit Analysis"
+                    ? "bg-white text-[#071739] shadow-xl"
+                    : "text-slate-300 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                {item.name}
+              </Link>
+            )
+          )}
+        </nav>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-8 lg:p-10 z-10">
+      <main className="z-10 flex-1 p-8 lg:p-10">
         {/* Header */}
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
-              Admissions & Marketing Dashboard
+              Admissions & Marketing
+              Dashboard
             </p>
 
             <h2 className="mt-3 text-5xl font-extrabold tracking-tight text-[#071739]">
@@ -222,13 +257,26 @@ const retentionRate = (
             </h2>
 
             <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-500">
-              Monitor student exit trends and
-              retention insights with live
-              spreadsheet integration.
+              Monitor student exit trends
+              and retention insights with
+              live spreadsheet
+              integration.
             </p>
           </div>
 
-          <div>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <input
+              type="text"
+              placeholder="Search student..."
+              value={search}
+              onChange={(e) =>
+                setSearch(
+                  e.target.value
+                )
+              }
+              className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
+            />
+
             <select
               value={selectedYear}
               onChange={(e) =>
@@ -236,16 +284,18 @@ const retentionRate = (
                   e.target.value
                 )
               }
-              className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[#071739] shadow-lg outline-none transition focus:border-blue-500"
+              className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
             >
-              {academicYears.map((year) => (
-                <option
-                  key={year}
-                  value={year}
-                >
-                  {year}
-                </option>
-              ))}
+              {academicYears.map(
+                (year) => (
+                  <option
+                    key={year}
+                    value={year}
+                  >
+                    {year}
+                  </option>
+                )
+              )}
             </select>
           </div>
         </div>
@@ -253,96 +303,102 @@ const retentionRate = (
         {/* KPI Cards */}
         <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           <StatCard
-          title="Total Exits"
-          value={String(totalExits)}
+            title="Total Exits"
+            value={String(
+              totalExits
+            )}
           />
-          
-          <StatCard
-          title="Retention Rate"
-          value={`${retentionRate}%`}
-          />
-          
-          <StatCard
-          title="Top Reason"
-          value={topReason}
-          />
-          
-          <StatCard
-          title="Most Affected Grade"
-          value={mostAffectedGrade}
-          />
-          </div>
 
-        {/* Analytics Section */}
+          <StatCard
+            title="Retention Rate"
+            value={`${retentionRate}%`}
+          />
+
+          <StatCard
+            title="Top Reason"
+            value={topReason}
+          />
+
+          <StatCard
+            title="Most Affected Grade"
+            value={`Grade ${mostAffectedGrade}`}
+          />
+        </div>
+
+        {/* Analytics */}
         <section className="mt-10 grid grid-cols-1 gap-8 xl:grid-cols-3">
           {/* Pie Chart */}
-          <div className="xl:col-span-2 rounded-[32px] border border-white bg-white/90 backdrop-blur-sm p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)]">
+          <div className="rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm xl:col-span-2">
             <h3 className="text-3xl font-bold text-[#071739]">
               Exit Reasons Analytics
             </h3>
 
             <p className="mt-2 text-sm text-slate-500">
-              Distribution of student
-              exits by reason.
+              Distribution of student exits
+              by reason.
             </p>
 
-            <div className="mt-8 flex flex-col items-center">
-              <PieChart
-                width={550}
-                height={450}
-              >
-                <Pie
-                  data={reasonData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={160}
-                  innerRadius={70}
-                  dataKey="value"
-                  paddingAngle={4}
-                  labelLine={false}
-                  label={({
-                    percent,
-                  }: any) =>
-                    `${(
-                      (percent || 0) * 100
-                    ).toFixed(0)}%`
-                  }
+            <div className="mt-10 flex flex-col items-center">
+              <div className="overflow-x-auto">
+                <PieChart
+                  width={420}
+                  height={420}
                 >
-                  {reasonData.map(
-                    (
-                      entry: any,
-                      index: number
-                    ) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={
-                          REASON_COLORS[
-                            entry.name.trim()
-                          ] ||
-                          "#94A3B8"
-                        }
-                        stroke="#fff"
-                        strokeWidth={4}
-                      />
-                    )
-                  )}
-                </Pie>
+                  <Pie
+                    data={reasonData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={150}
+                    innerRadius={75}
+                    dataKey="value"
+                    paddingAngle={4}
+                    labelLine={false}
+                    label={({
+                      percent,
+                    }) =>
+                      `${(
+                        (percent || 0) *
+                        100
+                      ).toFixed(0)}%`
+                    }
+                  >
+                    {reasonData.map(
+                      (
+                        entry,
+                        index
+                      ) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={
+                            REASON_COLORS[
+                              entry.name.trim()
+                            ] ||
+                            "#94A3B8"
+                          }
+                          stroke="#fff"
+                          strokeWidth={4}
+                        />
+                      )
+                    )}
+                  </Pie>
 
-                <Tooltip
-                  formatter={(
-                    value: any
-                  ) => [
-                    `${value} Students`,
-                    "Total",
-                  ]}
-                />
-              </PieChart>
+                  <Tooltip
+                    formatter={(
+                      value
+                    ) => [
+                      `${value} Students`,
+                      "Total",
+                    ]}
+                  />
+                </PieChart>
+              </div>
 
-              <div className="mt-2 flex flex-wrap justify-center gap-6">
+              {/* Legend */}
+              <div className="mt-8 flex flex-wrap justify-center gap-6">
                 {reasonData.map(
                   (
-                    item: any,
-                    index: number
+                    item,
+                    index
                   ) => (
                     <div
                       key={index}
@@ -370,7 +426,7 @@ const retentionRate = (
           </div>
 
           {/* Summary */}
-          <div className="rounded-[32px] border border-white bg-white/90 backdrop-blur-sm p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)]">
+          <div className="rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm">
             <h3 className="text-3xl font-bold text-[#071739]">
               Exit Summary
             </h3>
@@ -379,11 +435,11 @@ const retentionRate = (
               Student exit overview.
             </p>
 
-            <div className="mt-8 space-y-4">
+            <div className="mt-8 space-y-3">
               {reasonData.map(
                 (
-                  item: any,
-                  index: number
+                  item,
+                  index
                 ) => (
                   <div
                     key={index}
@@ -428,7 +484,7 @@ const retentionRate = (
         </section>
 
         {/* Table */}
-        <section className="mt-10 rounded-[32px] border border-white bg-white/90 backdrop-blur-sm p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)]">
+        <section className="mt-10 rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <h3 className="text-3xl font-bold text-[#071739]">
@@ -446,10 +502,10 @@ const retentionRate = (
             </div>
           </div>
 
-          <div className="mt-8 overflow-x-auto rounded-2xl">
+          <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-100">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-500">
+                <tr className="bg-slate-50 text-left text-slate-500">
                   <th className="px-5 py-4 font-bold">
                     Student Name
                   </th>
@@ -476,50 +532,66 @@ const retentionRate = (
                 {loading ? (
                   <tr>
                     <td
-                      colSpan={8}
+                      colSpan={5}
                       className="py-16 text-center text-slate-400"
                     >
                       Loading spreadsheet
                       data...
                     </td>
                   </tr>
-                ) : filteredData.length >
+                ) : searchedData.length >
                   0 ? (
-                  filteredData.map(
+                  searchedData.map(
                     (
-                      student: any,
-                      index: number
+                      student,
+                      index
                     ) => (
                       <tr
                         key={index}
-                        className="border-b border-slate-100 transition-colors duration-200 hover:bg-blue-50/40"
+                        className="border-t border-slate-100 transition-colors duration-200 hover:bg-blue-50/40"
                       >
-                        {Object.values(
-                          student
-                        ).map(
-                          (
-                            value: any,
-                            i: number
-                          ) => (
-                            <td
-                              key={i}
-                              className="px-5 py-4 text-[#071739]"
-                            >
-                              {value ||
-                                "-"}
-                            </td>
-                          )
-                        )}
+                        <td className="px-5 py-4 font-medium text-[#071739]">
+                          {student[
+                            "Student Name"
+                          ] || "-"}
+                        </td>
+
+                        <td className="px-5 py-4 text-[#071739]">
+                          Grade{" "}
+                          {student[
+                            "Grade Level"
+                          ] || "-"}
+                        </td>
+
+                        <td className="px-5 py-4 text-[#071739]">
+                          {student[
+                            "Academic Year"
+                          ] || "-"}
+                        </td>
+
+                        <td className="px-5 py-4">
+                          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                            {student[
+                              "Reason for Leaving"
+                            ] || "-"}
+                          </span>
+                        </td>
+
+                        <td className="px-5 py-4 text-slate-500">
+                          {student[
+                            "Notes"
+                          ] || "-"}
+                        </td>
                       </tr>
                     )
                   )
                 ) : (
                   <tr>
                     <td
-                      colSpan={8}
+                      colSpan={5}
                       className="py-16 text-center text-slate-400"
                     >
-                      No student exit data
+                      No matching students
                       found.
                     </td>
                   </tr>
@@ -541,7 +613,7 @@ function StatCard({
   value: string;
 }) {
   return (
-    <div className="rounded-[28px] border border-white bg-white/90 backdrop-blur-sm p-6 shadow-[0_10px_40px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(15,23,42,0.12)]">
+    <div className="rounded-[28px] border border-white bg-white/90 p-6 shadow-[0_10px_40px_rgba(15,23,42,0.06)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(15,23,42,0.12)]">
       <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
         {title}
       </p>

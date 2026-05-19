@@ -2,7 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+} from "recharts";
+
 import { Plus_Jakarta_Sans } from "next/font/google";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -19,6 +31,63 @@ const menuItems = [
     name: "Enrollment Status",
     path: "/enrollment-status",
   },
+];
+
+const STAGE_STYLES: Record<
+  string,
+  string
+> = {
+  Inquiry:
+    "bg-slate-100 text-slate-700",
+
+  Observation:
+    "bg-indigo-100 text-indigo-700",
+
+  "MAP Test":
+    "bg-blue-100 text-blue-700",
+
+  "Documents Pending":
+    "bg-amber-100 text-amber-700",
+
+  Onboarding:
+    "bg-cyan-100 text-cyan-700",
+
+  Accepted:
+    "bg-green-100 text-green-700",
+
+  "Payment Completed":
+    "bg-emerald-100 text-emerald-700",
+
+  Enrolled:
+    "bg-emerald-100 text-emerald-700",
+
+  Withdrawn:
+    "bg-red-100 text-red-700",
+};
+
+const STATUS_STYLES: Record<
+  string,
+  string
+> = {
+  Complete:
+    "bg-green-100 text-green-700",
+
+  Pending:
+    "bg-amber-100 text-amber-700",
+
+  "In Progress":
+    "bg-purple-100 text-purple-700",
+};
+
+const CHART_COLORS = [
+  "#2563EB",
+  "#0EA5E9",
+  "#06B6D4",
+  "#8B5CF6",
+  "#F59E0B",
+  "#10B981",
+  "#EF4444",
+  "#EC4899",
 ];
 
 type EnrollmentStudent = {
@@ -83,10 +152,33 @@ export default function EnrollmentStatus() {
   useState("");
   const [selectedStage, setSelectedStage] =
   useState("All Stages");
-  const [selectedStudent, setSelectedStudent] =
+ const [selectedStudent, setSelectedStudent] =
   useState<EnrollmentStudent | null>(
     null
   );
+
+useEffect(() => {
+  function handleEscape(
+    event: KeyboardEvent
+  ) {
+    if (event.key === "Escape") {
+      setSelectedStudent(null);
+    }
+  }
+
+  window.addEventListener(
+    "keydown",
+    handleEscape
+  );
+
+  return () => {
+    window.removeEventListener(
+      "keydown",
+      handleEscape
+    );
+  };
+}, []);
+
 
   useEffect(() => {
     async function fetchData() {
@@ -113,8 +205,8 @@ export default function EnrollmentStatus() {
     fetchData();
 
     const interval = setInterval(() => {
-      fetchData();
-    }, 10000);
+    fetchData();
+    }, 60000);
 
     return () => clearInterval(interval);
   }, []);
@@ -138,83 +230,133 @@ export default function EnrollmentStatus() {
   ),
 ];
 
-const filteredData =
-  enrollmentData.filter((student) => {
-    const matchesYear =
-      selectedYear ===
-        "All Years" ||
-      student["Academic Year"] ===
-        selectedYear;
+const filteredData = useMemo(() => {
+  return enrollmentData.filter(
+    (student) => {
+      const matchesYear =
+        selectedYear ===
+          "All Years" ||
+        student[
+          "Academic Year"
+        ] === selectedYear;
 
-    const matchesSearch =
-      student["Student Name"]
-        ?.toLowerCase()
-        .includes(
-          searchTerm.toLowerCase()
-        );
+      const matchesSearch =
+        student[
+          "Student Name"
+        ]
+          ?.toLowerCase()
+          .includes(
+            searchTerm.toLowerCase()
+          );
 
-    const matchesStage =
-      selectedStage ===
-        "All Stages" ||
-      student["Current Stage"] ===
-        selectedStage;
+      const matchesStage =
+        selectedStage ===
+          "All Stages" ||
+        student[
+          "Current Stage"
+        ] === selectedStage;
 
-    return (
-      matchesYear &&
-      matchesSearch &&
-      matchesStage
-    );
+      return (
+        matchesYear &&
+        matchesSearch &&
+        matchesStage
+      );
+    }
+  );
+}, [
+  enrollmentData,
+  selectedYear,
+  searchTerm,
+  selectedStage,
+]);
+
+const stageChartData = useMemo(() => {
+  const counts: Record<
+    string,
+    number
+  > = {};
+
+  filteredData.forEach((student) => {
+    const stage =
+      student["Current Stage"] ||
+      "Unknown";
+
+    counts[stage] =
+      (counts[stage] || 0) + 1;
   });
 
-const totalApplicants =
-  filteredData.length;
+  return Object.entries(counts).map(
+    ([name, value]) => ({
+      name,
+      value,
+    })
+  );
+}, [filteredData]);
 
-const completedStudents =
-  filteredData.filter(
-    (student) =>
-      student["Final Status"] ===
-      "Completed"
-  ).length;
+const dashboardStats = useMemo(() => {
+  const completed =
+    filteredData.filter(
+      (student) =>
+        student[
+          "Final Status"
+        ] === "Completed"
+    ).length;
 
-const pendingStudents =
-  filteredData.filter(
-    (student) =>
-      student["Final Status"] ===
-      "Pending"
-  ).length;
+  const pending =
+    filteredData.filter(
+      (student) =>
+        student[
+          "Final Status"
+        ] === "Pending"
+    ).length;
 
-const inProgressStudents =
-  filteredData.filter(
-    (student) =>
-      student["Final Status"] ===
-      "In Progress"
-  ).length;
+  const inProgress =
+    filteredData.filter(
+      (student) =>
+        student[
+          "Final Status"
+        ] === "In Progress"
+    ).length;
 
-const fullyPayingStudents =
-  filteredData.filter(
-    (student) =>
-      student[
-        "Payment Type"
-      ] === "Fully Paying"
-  ).length;
+  const fullyPaying =
+    filteredData.filter(
+      (student) =>
+        student[
+          "Payment Type"
+        ] === "Fully Paying"
+    ).length;
 
-const teacherSubsidyStudents =
-  filteredData.filter(
-    (student) =>
-      student[
-        "Payment Type"
-      ] ===
-      "Teacher Subsidy"
-  ).length;
+  const teacherSubsidy =
+    filteredData.filter(
+      (student) =>
+        student[
+          "Payment Type"
+        ] ===
+        "Teacher Subsidy"
+    ).length;
 
-const scholarshipStudents =
-  filteredData.filter(
-    (student) =>
-      student[
-        "Payment Type"
-      ] ===
-      "Academic Scholarship"
-  ).length;
+  const scholarship =
+    filteredData.filter(
+      (student) =>
+        student[
+          "Payment Type"
+        ] ===
+        "Academic Scholarship"
+    ).length;
+
+  return {
+    totalApplicants:
+      filteredData.length,
+
+    completed,
+    pending,
+    inProgress,
+
+    fullyPaying,
+    teacherSubsidy,
+    scholarship,
+  };
+}, [filteredData]);
 
  const attentionStudents =
   filteredData.filter(
@@ -316,13 +458,17 @@ const progressPercentage =
       {/* Sidebar */}
       <aside className="hidden md:flex w-72 flex-col bg-[#071739] text-white p-6 border-r border-white/10 shadow-2xl z-10">
         <div className="flex items-center gap-4">
-          <Image
-            src="/njis-logo.png"
-            alt="NJIS Logo"
-            width={52}
-            height={52}
-            className="rounded-xl bg-white p-2"
-          />
+<Image
+  src="/njis-logo.png"
+  alt="NJIS Logo"
+  width={52}
+  height={52}
+  style={{
+    width: "auto",
+    height: "auto",
+  }}
+  className="rounded-xl bg-white p-2"
+/>
 
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight">
@@ -355,6 +501,7 @@ const progressPercentage =
 
       {/* Main Content */}
       <main className="flex-1 p-8 lg:p-10 z-10">
+
         {/* Header */}
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -424,57 +571,281 @@ const progressPercentage =
 </div>
         </div>
 
-        {/* KPI Cards */}
-        <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            title="Total Applicants"
-            value={String(
-              totalApplicants
-            )}
-          />
+{/* Primary KPI */}
+<div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+  <StatCard
+    title="Total Applicants"
+    value={String(
+      dashboardStats.totalApplicants
+    )}
+  />
 
-          <StatCard
-            title="Completed"
-            value={String(
-              completedStudents
-            )}
-          />
+  <StatCard
+    title="Completed"
+    value={String(
+      dashboardStats.completed
+    )}
+  />
 
-          <StatCard
-            title="Pending"
-            value={String(
-              pendingStudents
-            )}
-          />
+  <StatCard
+    title="Pending"
+    value={String(
+      dashboardStats.pending
+    )}
+  />
 
-          <StatCard
-            title="In Progress"
-            value={String(
-              inProgressStudents
-            )}
-          />
+  <StatCard
+    title="In Progress"
+    value={String(
+      dashboardStats.inProgress
+    )}
+  />
+</div>
 
-          <StatCard
-  title="Fully Paying"
-  value={String(
-    fullyPayingStudents
-  )}
-/>
+{/* Secondary KPI */}
+<div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+  <SecondaryStatCard
+    title="Fully Paying"
+    value={String(
+      dashboardStats.fullyPaying
+    )}
+  />
 
-<StatCard
-  title="Teacher Subsidy"
-  value={String(
-    teacherSubsidyStudents
-  )}
-/>
+  <SecondaryStatCard
+    title="Teacher Subsidy"
+    value={String(
+      dashboardStats.teacherSubsidy
+    )}
+  />
 
-<StatCard
-  title="Academic Scholarship"
-  value={String(
-    scholarshipStudents
-  )}
-/>
-        </div>
+  <SecondaryStatCard
+    title="Academic Scholarship"
+    value={String(
+      dashboardStats.scholarship
+    )}
+  />
+</div>
+
+{/* Analytics */}
+<section className="mt-10 grid grid-cols-1 gap-8 xl:grid-cols-3">
+  {/* Stage Distribution */}
+  <div className="rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm xl:col-span-2">
+    <h3 className="text-3xl font-bold text-[#071739]">
+      Stage Distribution
+    </h3>
+
+    <p className="mt-2 text-sm text-slate-500">
+      Student distribution by
+      current admissions stage.
+    </p>
+
+    <div className="mt-10 flex flex-col items-center">
+      <PieChart
+        width={320}
+        height={320}
+      >
+        <Pie
+          data={stageChartData}
+          cx="50%"
+          cy="50%"
+          outerRadius={110}
+          innerRadius={60}
+          dataKey="value"
+          paddingAngle={4}
+          labelLine={false}
+          label={({ percent }) =>
+            `${(
+              (percent || 0) * 100
+            ).toFixed(0)}%`
+          }
+        >
+          {stageChartData.map(
+            (_, index) => (
+              <Cell
+                key={index}
+                fill={
+                  CHART_COLORS[
+                    index %
+                      CHART_COLORS.length
+                  ]
+                }
+                stroke="#fff"
+                strokeWidth={4}
+              />
+            )
+          )}
+        </Pie>
+
+        <Tooltip />
+      </PieChart>
+
+      <div className="mt-8 flex flex-wrap justify-center gap-5">
+        {stageChartData.map(
+          (item, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-2"
+            >
+              <div
+                className="h-4 w-4 rounded-full"
+                style={{
+                  backgroundColor:
+                    CHART_COLORS[
+                      index %
+                        CHART_COLORS.length
+                    ],
+                }}
+              />
+
+              <span className="text-sm font-semibold text-slate-700">
+                {item.name}
+              </span>
+            </div>
+          )
+        )}
+      </div>
+    </div>
+  </div>
+
+  {/* Analytics Summary */}
+  <div className="rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm">
+    <h3 className="text-3xl font-bold text-[#071739]">
+      Analytics Summary
+    </h3>
+
+    <p className="mt-2 text-sm text-slate-500">
+      Admissions insights overview.
+    </p>
+
+    <div className="mt-8 space-y-4">
+      {stageChartData.map(
+        (item, index) => (
+          <div
+            key={index}
+            className="rounded-2xl border border-slate-100 bg-slate-50 p-5"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div
+                  className="h-3 w-3 rounded-full"
+                  style={{
+                    backgroundColor:
+                      CHART_COLORS[
+                        index %
+                          CHART_COLORS.length
+                      ],
+                  }}
+                />
+
+                <p className="font-semibold text-[#071739]">
+                  {item.name}
+                </p>
+              </div>
+
+              <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-bold text-blue-700">
+                {item.value}
+              </span>
+            </div>
+          </div>
+        )
+      )}
+    </div>
+  </div>
+</section>
+
+{/* Needs Attention */}
+{attentionStudents.length > 0 && (
+  <section className="mt-10 rounded-[32px] border border-red-100 bg-red-50/60 p-8 shadow-sm">
+    <div className="flex items-center justify-between">
+      <div>
+        <h3 className="text-2xl font-bold text-red-700">
+          Needs Attention
+        </h3>
+
+        <p className="mt-2 text-sm text-red-500">
+          Students with incomplete
+          documents or onboarding.
+        </p>
+      </div>
+
+      <div className="rounded-full bg-red-100 px-4 py-2 text-sm font-bold text-red-700">
+        {attentionStudents.length} Students
+      </div>
+    </div>
+
+    <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {attentionStudents
+        .slice(0, 4)
+        .map((student, index) => (
+          <div
+            key={index}
+            onClick={() =>
+              setSelectedStudent(
+                student
+              )
+            }
+            className="cursor-pointer rounded-2xl border border-red-100 bg-white p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-bold text-[#071739]">
+                  {
+                    student[
+                      "Student Name"
+                    ]
+                  }
+                </h4>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  Grade{" "}
+                  {
+                    student[
+                      "Grade Applying"
+                    ]
+                  }
+                </p>
+              </div>
+
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-bold ${
+                  STAGE_STYLES[
+                    student[
+                      "Current Stage"
+                    ]
+                  ] ||
+                  "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {
+                  student[
+                    "Current Stage"
+                  ]
+                }
+              </span>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {student[
+                "Documents Status"
+              ] !== "Complete" && (
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
+                  Documents Pending
+                </span>
+              )}
+
+              {student[
+                "Onboarding Status"
+              ] !== "Complete" && (
+                <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">
+                  Onboarding Pending
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
+    </div>
+  </section>
+)}
 
         {/* Enrollment Table */}
         <section className="mt-10 rounded-[32px] border border-white bg-white/90 backdrop-blur-sm p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)]">
@@ -488,6 +859,10 @@ const progressPercentage =
                 Live spreadsheet synced
                 enrollment records.
               </p>
+              <p className="mt-1 text-xs font-medium text-slate-400">
+  Click a student row to view
+  detailed enrollment progress.
+</p>
             </div>
 
             <div className="rounded-full bg-green-100 px-5 py-2 text-sm font-semibold text-green-700">
@@ -495,9 +870,9 @@ const progressPercentage =
             </div>
           </div>
 
-          <div className="mt-8 overflow-x-auto rounded-2xl">
+          <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-100">
             <table className="min-w-full text-sm">
-              <thead>
+              <thead className="sticky top-0 z-10">
                 <tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-500">
                   <th className="px-5 py-4 font-bold">
                     Student Name
@@ -529,12 +904,17 @@ const progressPercentage =
                 {loading ? (
                   <tr>
                     <td
-                      colSpan={6}
-                      className="py-16 text-center text-slate-400"
-                    >
-                      Loading enrollment
-                      data...
-                    </td>
+  colSpan={6}
+  className="py-20 text-center"
+>
+  <div className="flex flex-col items-center">
+    <div className="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-blue-500" />
+
+    <p className="mt-5 text-sm font-semibold text-slate-500">
+      Loading enrollment data...
+    </p>
+  </div>
+</td>
                   </tr>
                 ) : filteredData.length >
                   0 ? (
@@ -548,7 +928,7 @@ const progressPercentage =
   onClick={() =>
     setSelectedStudent(student)
   }
-  className="cursor-pointer border-b border-slate-100 transition-colors duration-200 hover:bg-blue-50/40"
+  className="cursor-pointer border-b border-slate-100 transition-all duration-200 hover:bg-blue-50/60 hover:shadow-sm"
 >
                         <td className="px-5 py-4 font-medium text-[#071739]">
                           {
@@ -567,56 +947,12 @@ const progressPercentage =
                         </td>
 
 <td className="px-5 py-4">
- <span
+<span
   className={`rounded-full px-3 py-1 text-sm font-semibold ${
-    student[
-      "Current Stage"
-    ] === "Inquiry"
-      ? "bg-slate-100 text-slate-700"
-
-      : student[
-          "Current Stage"
-        ] === "Observation"
-      ? "bg-indigo-100 text-indigo-700"
-
-      : student[
-          "Current Stage"
-        ] === "MAP Test"
-      ? "bg-blue-100 text-blue-700"
-
-      : student[
-          "Current Stage"
-        ] ===
-        "Documents Pending"
-      ? "bg-amber-100 text-amber-700"
-
-      : student[
-    "Current Stage"
-      ] === "Onboarding"
-      ? "bg-cyan-100 text-cyan-700"
-
-      : student[
-          "Current Stage"
-        ] === "Accepted"
-      ? "bg-green-100 text-green-700"
-
-      : student[
-          "Current Stage"
-        ] ===
-        "Payment Completed"
-      ? "bg-emerald-100 text-emerald-700"
-
-      : student[
-          "Current Stage"
-        ] === "Enrolled"
-      ? "bg-emerald-100 text-emerald-700"
-
-      : student[
-          "Current Stage"
-        ] === "Withdrawn"
-      ? "bg-red-100 text-red-700"
-
-      : "bg-gray-100 text-gray-500"
+    STAGE_STYLES[
+      student["Current Stage"]
+    ] ||
+    "bg-gray-100 text-gray-500"
   }`}
 >
   {student["Current Stage"] ||
@@ -624,43 +960,39 @@ const progressPercentage =
 </span>
 </td>
 
-                        <td className="px-5 py-4">
-                          <span
-                            className={`rounded-full px-3 py-1 text-sm font-semibold ${
-                              student[
-                                "Documents Status"
-                              ] ===
-                              "Complete"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-amber-100 text-amber-700"
-                            }`}
-                          >
-                            {
-                              student[
-                                "Documents Status"
-                              ]
-                            }
-                          </span>
-                        </td>
+<td className="px-5 py-4">
+  <span
+    className={`rounded-full px-3 py-1 text-sm font-semibold ${
+      STATUS_STYLES[
+        student[
+          "Documents Status"
+        ]
+      ] ||
+      "bg-slate-100 text-slate-600"
+    }`}
+  >
+    {student[
+      "Documents Status"
+    ] || "-"}
+  </span>
+</td>
 
-                        <td className="px-5 py-4">
-                          <span
-                            className={`rounded-full px-3 py-1 text-sm font-semibold ${
-                              student[
-                                "Onboarding Status"
-                              ] ===
-                              "Complete"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-purple-100 text-purple-700"
-                            }`}
-                          >
-                            {
-                              student[
-                                "Onboarding Status"
-                              ]
-                            }
-                          </span>
-                        </td>
+<td className="px-5 py-4">
+  <span
+    className={`rounded-full px-3 py-1 text-sm font-semibold ${
+      STATUS_STYLES[
+        student[
+          "Onboarding Status"
+        ]
+      ] ||
+      "bg-slate-100 text-slate-600"
+    }`}
+  >
+    {student[
+      "Onboarding Status"
+    ] || "-"}
+  </span>
+</td>
 
                         <td className="px-5 py-4 text-[#071739]">
                           {
@@ -674,25 +1006,48 @@ const progressPercentage =
                   )
                 ) : (
                   <tr>
-                    <td
-                      colSpan={6}
-                      className="py-16 text-center text-slate-400"
-                    >
-                      No enrollment data
-                      found.
-                    </td>
+<td
+  colSpan={6}
+  className="py-20 text-center"
+>
+  <div className="flex flex-col items-center">
+    <div className="rounded-full bg-slate-100 px-6 py-4 text-3xl">
+      📂
+    </div>
+
+    <h3 className="mt-5 text-xl font-bold text-[#071739]">
+      No Enrollment Records Found
+    </h3>
+
+    <p className="mt-2 text-sm text-slate-500">
+      Try adjusting your search or
+      filters.
+    </p>
+  </div>
+</td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
         </section>
+
         {/* Student Detail Modal */}
 {selectedStudent && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-    <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[32px] bg-white p-8 shadow-2xl">
-      {/* Header */}
-      <div className="flex items-start justify-between">
+  <div
+  className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+  onClick={() =>
+    setSelectedStudent(null)
+  }
+>
+    <div
+  className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[32px] bg-white p-8 shadow-2xl"
+  onClick={(e) =>
+    e.stopPropagation()
+  }
+>
+{/* Header */}
+<div className="sticky top-0 z-20 -mx-8 -mt-8 mb-8 flex items-start justify-between border-b border-slate-200 bg-white px-8 py-6">
         <div>
           <h2 className="text-3xl font-extrabold text-[#071739]">
             {
@@ -716,7 +1071,7 @@ const progressPercentage =
           onClick={() =>
             setSelectedStudent(null)
           }
-          className="rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-200"
+          className="rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600 transition-all duration-200 hover:scale-105 hover:bg-slate-200"
         >
           Close
         </button>
@@ -795,6 +1150,8 @@ const progressPercentage =
         />
       </div>
 
+<div className="mt-10 border-t border-slate-200" />
+
 {/* Admissions Progress */}
 <div className="mt-10 rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
   <div className="flex items-center justify-between">
@@ -823,6 +1180,8 @@ const progressPercentage =
   </div>
 </div>
 
+<div className="mt-10 border-t border-slate-200" />
+
 {/* Documents Checklist */}
 <div className="mt-10">
   {/* Required Documents */}
@@ -834,7 +1193,7 @@ const progressPercentage =
 
       {requiredDocuments.some(
         (doc) =>
-          selectedStudent[
+          selectedStudent?.[
             doc as keyof EnrollmentStudent
           ] !== "TRUE"
       ) && (
@@ -845,33 +1204,23 @@ const progressPercentage =
     </div>
 
     <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-      {requiredDocuments.map((doc) => {
-        const isComplete =
-          selectedStudent[
-            doc as keyof EnrollmentStudent
-          ] === "TRUE";
+{requiredDocuments.map((doc) => {
+  const isComplete =
+    selectedStudent?.[
+      doc as keyof EnrollmentStudent
+    ] === "TRUE";
 
-        return (
-          <div
-            key={doc}
-            className={`flex items-center justify-between rounded-2xl border px-4 py-3 transition ${
-              isComplete
-                ? "border-green-200 bg-green-50"
-                : "border-red-200 bg-red-50"
-            }`}
-          >
-            <span className="text-sm font-semibold text-[#071739]">
-              {doc}
-            </span>
-
-            <span className="text-lg">
-              {isComplete
-                ? "✅"
-                : "❌"}
-            </span>
-          </div>
-        );
-      })}
+  return (
+    <div key={doc}>
+      {renderChecklistItem(
+        doc,
+        isComplete,
+        "border-green-200 bg-green-50",
+        "border-red-200 bg-red-50"
+      )}
+    </div>
+  );
+})}
     </div>
   </div>
 
@@ -882,36 +1231,29 @@ const progressPercentage =
     </h3>
 
     <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-      {optionalDocuments.map((doc) => {
-        const isComplete =
-          selectedStudent[
-            doc as keyof EnrollmentStudent
-          ] === "TRUE";
+{optionalDocuments.map((doc) => {
+  const isComplete =
+    selectedStudent?.[
+      doc as keyof EnrollmentStudent
+    ] === "TRUE";
 
-        return (
-          <div
-            key={doc}
-            className={`flex items-center justify-between rounded-2xl border px-4 py-3 transition ${
-              isComplete
-                ? "border-blue-200 bg-blue-50"
-                : "border-slate-200 bg-slate-50"
-            }`}
-          >
-            <span className="text-sm font-semibold text-[#071739]">
-              {doc}
-            </span>
-
-            <span className="text-lg">
-              {isComplete
-                ? "✅"
-                : "➖"}
-            </span>
-          </div>
-        );
-      })}
+  return (
+    <div key={doc}>
+      {renderChecklistItem(
+        doc,
+        isComplete,
+        "border-blue-200 bg-blue-50",
+        "border-slate-200 bg-slate-50",
+        "➖"
+      )}
+    </div>
+  );
+})}
     </div>
   </div>
 </div>
+
+<div className="mt-10 border-t border-slate-200" />
 
 {/* Onboarding Checklist */}
 <div className="mt-10">
@@ -920,48 +1262,41 @@ const progressPercentage =
   </h3>
 
   <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-    {onboardingChecklist.map(
-      (item) => {
-        const isWaived =
-          item ===
-            "Admissions NJIS System" &&
-          selectedStudent[
-            "NJIS System Waived"
-          ] === "TRUE";
+{onboardingChecklist.map(
+  (item) => {
+    const isWaived =
+      item ===
+        "Admissions NJIS System" &&
+      selectedStudent?.[
+        "NJIS System Waived"
+      ] === "TRUE";
 
-        const isComplete =
-          selectedStudent[
-            item as keyof EnrollmentStudent
-          ] === "TRUE";
+    const isComplete =
+      selectedStudent?.[
+        item as keyof EnrollmentStudent
+      ] === "TRUE";
 
-        return (
-          <div
-            key={item}
-            className={`flex items-center justify-between rounded-2xl border px-4 py-3 transition ${
-              isWaived
-                ? "border-slate-200 bg-slate-100"
-                : isComplete
-                ? "border-green-200 bg-green-50"
-                : "border-amber-200 bg-amber-50"
-            }`}
-          >
-            <span className="text-sm font-semibold text-[#071739]">
-              {item}
-            </span>
-
-            <span className="text-lg">
-              {isWaived
-                ? "➖"
-                : isComplete
-                ? "✅"
-                : "❌"}
-            </span>
-          </div>
-        );
-      }
-    )}
+    return (
+      <div key={item}>
+        {renderChecklistItem(
+          item,
+          isWaived
+            ? false
+            : isComplete,
+          "border-green-200 bg-green-50",
+          isWaived
+            ? "border-slate-200 bg-slate-100"
+            : "border-amber-200 bg-amber-50",
+          isWaived ? "➖" : "❌"
+        )}
+      </div>
+    );
+  }
+)}
   </div>
 </div>
+
+<div className="mt-10 border-t border-slate-200" />
 
       {/* Notes */}
       <div className="mt-10 rounded-2xl bg-slate-50 p-5">
@@ -982,6 +1317,35 @@ const progressPercentage =
     </div>
   );
 }
+
+  function renderChecklistItem(
+  label: string,
+  isComplete: boolean,
+  completeStyle: string,
+  incompleteStyle: string,
+  incompleteIcon = "❌"
+) {
+  return (
+    <div
+      className={`flex items-center justify-between rounded-2xl border px-4 py-3 transition ${
+        isComplete
+          ? completeStyle
+          : incompleteStyle
+      }`}
+    >
+      <span className="text-sm font-semibold text-[#071739]">
+        {label}
+      </span>
+
+      <span className="text-lg">
+        {isComplete
+          ? "✅"
+          : incompleteIcon}
+      </span>
+    </div>
+  );
+}
+
 function DetailCard({
   title,
   value,
@@ -989,6 +1353,7 @@ function DetailCard({
   title: string;
   value: string;
 }) {
+
   return (
     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
       <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
@@ -1000,7 +1365,7 @@ function DetailCard({
       </p>
     </div>
   );
-} 
+}
 
 function StatCard({
   title,
@@ -1016,6 +1381,26 @@ function StatCard({
       </p>
 
       <h3 className="mt-4 text-4xl font-extrabold tracking-tight text-[#071739]">
+        {value}
+      </h3>
+    </div>
+  );
+}
+
+function SecondaryStatCard({
+  title,
+  value,
+}: {
+  title: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-[24px] border border-slate-200 bg-white/70 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+      <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+        {title}
+      </p>
+
+      <h3 className="mt-3 text-2xl font-extrabold text-[#071739]">
         {value}
       </h3>
     </div>

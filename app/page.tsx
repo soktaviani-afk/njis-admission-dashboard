@@ -8,18 +8,27 @@ import { User } from "lucide-react";
 export default function LoginPage() {
   const router = useRouter();
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] =
+    useState("");
 
-  function handleLogin(event: React.FormEvent<HTMLFormElement>) {
+  const [password, setPassword] =
+    useState("");
+
+  function handleLogin(
+    event: React.FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
 
     if (!username || !password) {
-      alert("Please enter username and password");
+      alert(
+        "Please enter username and password"
+      );
       return;
     }
 
-    router.push("/dashboard");
+    router.push(
+      "/enrollment-status"
+    );
   }
 
   return (
@@ -33,17 +42,26 @@ export default function LoginPage() {
         className="object-cover"
       />
 
-      <div className="absolute inset-0 bg-[#061b54]/20" />
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-[#061b54]/40 backdrop-blur-[2px]" />
+
+      {/* Glow */}
+      <div className="absolute left-0 top-0 h-[300px] w-[300px] rounded-full bg-blue-400/20 blur-3xl" />
+
+      <div className="absolute bottom-0 right-0 h-[280px] w-[280px] rounded-full bg-cyan-300/20 blur-3xl" />
 
       {/* Login card */}
       <form
         onSubmit={handleLogin}
-        className="relative z-10 mt-16 w-full max-w-[600px] rounded-[22px] bg-white px-10 pb-10 pt-28 shadow-[0_30px_90px_rgba(0,0,0,0.25)]"
+        className="relative z-10 mt-16 w-full max-w-[600px] rounded-[30px] border border-white/20 bg-white/95 px-10 pb-10 pt-28 shadow-[0_30px_90px_rgba(0,0,0,0.25)] backdrop-blur-xl"
       >
         {/* Avatar */}
-        <div className="absolute left-1/2 top-0 flex h-32 w-32 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#d9deea]">
+        <div className="absolute left-1/2 top-0 flex h-32 w-32 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#d9deea] shadow-2xl">
           <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[#a8adb8] text-[#d9deea]">
-            <User size={78} strokeWidth={1.5} />
+            <User
+              size={78}
+              strokeWidth={1.5}
+            />
           </div>
         </div>
 
@@ -51,41 +69,66 @@ export default function LoginPage() {
         <div className="absolute right-8 top-8">
           <Image
             src="/njis-logo.png"
-            alt="NJIS logo"
-            width={130}
-            height={70}
-            priority
-            className="h-auto w-[130px]"
+            alt="NJIS Logo"
+            width={52}
+            height={52}
+            style={{
+              width: "auto",
+              height: "auto",
+            }}
+            className="rounded-xl bg-white p-2 shadow-md"
           />
         </div>
 
+        {/* Header */}
+        <div className="mb-10 text-center">
+          <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
+            NJIS Internal Portal
+          </p>
+
+          <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-[#071739]">
+            Admissions Dashboard
+          </h1>
+
+          <p className="mt-3 text-sm leading-relaxed text-slate-500">
+            Access enrollment analytics,
+            admissions tracking, and
+            operational monitoring.
+          </p>
+        </div>
+
+        {/* Inputs */}
         <div className="mx-auto flex max-w-[440px] flex-col gap-6">
           <input
             type="text"
             placeholder="Username"
             value={username}
-            onChange={(event) => setUsername(event.target.value)}
-            className="h-12 rounded-full bg-[#d3d3d3] px-6 text-center text-3xl text-black outline-none placeholder:text-black focus:ring-4 focus:ring-blue-200"
+            onChange={(event) =>
+              setUsername(
+                event.target.value
+              )
+            }
+            className="h-14 rounded-full border border-slate-200 bg-slate-100 px-6 text-center text-xl font-semibold text-[#071739] outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
           />
 
           <input
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className="h-12 rounded-full bg-[#d3d3d3] px-6 text-center text-3xl text-black outline-none placeholder:text-black focus:ring-4 focus:ring-blue-200"
+            onChange={(event) =>
+              setPassword(
+                event.target.value
+              )
+            }
+            className="h-14 rounded-full border border-slate-200 bg-slate-100 px-6 text-center text-xl font-semibold text-[#071739] outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
           />
 
           <button
             type="submit"
-            className="mt-6 rounded-full bg-[#071739] px-6 py-3 text-lg font-bold uppercase tracking-wide text-white transition hover:bg-[#12337a]"
+            className="mt-4 rounded-full bg-[#071739] px-6 py-4 text-lg font-bold uppercase tracking-wide text-white transition-all duration-300 hover:-translate-y-1 hover:bg-[#12337a] hover:shadow-2xl"
           >
             Login
           </button>
-
-          <p className="mt-4 text-center text-xl font-extrabold tracking-wide text-black">
-            NJIS MARKETING DEPARTMENT
-          </p>
         </div>
       </form>
     </main>
