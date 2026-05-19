@@ -67,17 +67,13 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="absolute right-8 top-8">
-          <Image
-            src="/njis-logo.png"
-            alt="NJIS Logo"
-            width={52}
-            height={52}
-            style={{
-              width: "auto",
-              height: "auto",
-            }}
-            className="rounded-xl bg-white p-2 shadow-md"
-          />
+<Image
+  src="/njis-logo.png"
+  alt="NJIS Logo"
+  width={38}
+  height={38}
+  className="h-10 w-10 rounded-xl bg-white object-contain p-2 shadow-md"
+/>
         </div>
 
         {/* Header */}
