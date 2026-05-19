@@ -124,61 +124,49 @@ export default function EnrollmentStatus() {
       null
     );
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const masterRes =
-          await fetch(
-            "https://opensheet.elk.sh/1iBQf0dnRCCOC3NyoNYBDSzDaKHM-gI80XwKtGYMhpDA/MASTER_ENROLLMENT"
-          );
+useEffect(() => {
+  async function fetchData() {
+    try {
+      setLoading(true);
 
-        const systemRes =
-          await fetch(
-            "https://opensheet.elk.sh/1iBQf0dnRCCOC3NyoNYBDSzDaKHM-gI80XwKtGYMhpDA/NJIS%20Enrollment%20System"
-          );
+      const response = await fetch(
+        "https://opensheet.elk.sh/1iBQf0dnRCCOC3NyoNYBDSzDaKHM-gI80XwKtGYMhpDA/MASTER_ENROLLMENT"
+      );
 
-        const masterData =
-          await masterRes.json();
-
-        const systemData =
-          await systemRes.json();
-
-        const mergedData = [
-          ...(Array.isArray(
-            masterData
-          )
-            ? masterData
-            : []),
-
-          ...(Array.isArray(
-            systemData
-          )
-            ? systemData
-            : []),
-        ];
-
-        setEnrollmentData(
-          mergedData
+      if (!response.ok) {
+        throw new Error(
+          "Failed to fetch enrollment data"
         );
-      } catch (error) {
-        console.error(
-          "Failed fetching spreadsheet:",
-          error
-        );
-      } finally {
-        setLoading(false);
       }
+
+      const data =
+        await response.json();
+
+      setEnrollmentData(
+        Array.isArray(data)
+          ? data
+          : []
+      );
+    } catch (error) {
+      console.error(
+        "Failed fetching spreadsheet:",
+        error
+      );
+
+      setEnrollmentData([]);
+    } finally {
+      setLoading(false);
     }
+  }
 
-    fetchData();
+  fetchData();
 
-    const interval = setInterval(() => {
-      fetchData();
-    }, 60000);
+  const interval =
+    setInterval(fetchData, 60000);
 
-    return () =>
-      clearInterval(interval);
-  }, []);
+  return () =>
+    clearInterval(interval);
+}, []);
 
   const filteredData = useMemo(() => {
     return enrollmentData.filter(
