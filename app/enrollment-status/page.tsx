@@ -69,34 +69,77 @@ const STAGE_STYLES: Record<
 
 type EnrollmentStudent = {
   "Student Name": string;
+
   "Grade Applying": string;
+
   "Nationality Type": string;
+
   "Academic Year": string;
 
   PIC: string;
 
   "Current Stage": string;
+
   "Documents Status": string;
 
   "Payment Type": string;
+
   "Final Status": string;
+
+  "Onboarding Status": string;
+
+  "Admissions NJIS System": string;
+
+  "NJIS System Waived": string;
+
+  "Acceptance Letter": string;
+
+  "Inform Finance to Invoice": string;
+
+  "Student Data List (SDL) & LS US SDL": string;
+
+  Toddle: string;
+
+  "Emergency Bag": string;
+
+  "Toddle Health": string;
+
+  "Toddle Flags": string;
+
+  "Birthday List": string;
+
+  "Parents Business List": string;
+
+  "Student ID": string;
+
+  "Nationality Flags": string;
+
+  "Scan Documents": string;
+
+  "Last Update": string;
 
   Notes: string;
 
   "Enrollment Agreement": string;
+
   "Media Release Form": string;
+
   "Birth Certificate": string;
+
   "Family Registry": string;
 
   "Parents Passport": string;
+
   "Parents ID": string;
 
   "Child Passport": string;
+
   "Child ID": string;
 
   KITAS: string;
 
   "Student Health Card": string;
+
   Immunization: string;
 
   "Report Card 3 Years": string;
@@ -124,49 +167,50 @@ export default function EnrollmentStatus() {
       null
     );
 
-useEffect(() => {
-  async function fetchData() {
-    try {
-      setLoading(true);
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true);
 
-      const response = await fetch(
-        "https://opensheet.elk.sh/1iBQf0dnRCCOC3NyoNYBDSzDaKHM-gI80XwKtGYMhpDA/MASTER_ENROLLMENT"
-      );
+        const response =
+          await fetch(
+            "https://opensheet.elk.sh/1iBQf0dnRCCOC3NyoNYBDSzDaKHM-gI80XwKtGYMhpDA/MASTER_ENROLLMENT"
+          );
 
-      if (!response.ok) {
-        throw new Error(
-          "Failed to fetch enrollment data"
+        if (!response.ok) {
+          throw new Error(
+            "Failed fetching enrollment data"
+          );
+        }
+
+        const data =
+          await response.json();
+
+        setEnrollmentData(
+          Array.isArray(data)
+            ? data
+            : []
         );
+      } catch (error) {
+        console.error(
+          "Spreadsheet fetch failed:",
+          error
+        );
+
+        setEnrollmentData([]);
+      } finally {
+        setLoading(false);
       }
-
-      const data =
-        await response.json();
-
-      setEnrollmentData(
-        Array.isArray(data)
-          ? data
-          : []
-      );
-    } catch (error) {
-      console.error(
-        "Failed fetching spreadsheet:",
-        error
-      );
-
-      setEnrollmentData([]);
-    } finally {
-      setLoading(false);
     }
-  }
 
-  fetchData();
+    fetchData();
 
-  const interval =
-    setInterval(fetchData, 60000);
+    const interval =
+      setInterval(fetchData, 60000);
 
-  return () =>
-    clearInterval(interval);
-}, []);
+    return () =>
+      clearInterval(interval);
+  }, []);
 
   const filteredData = useMemo(() => {
     return enrollmentData.filter(
@@ -183,7 +227,9 @@ useEffect(() => {
         const currentYear =
           student[
             "Academic Year"
-          ] === "2026/2027";
+          ]
+            ?.toString()
+            .includes("2026");
 
         return (
           matchesSearch &&
@@ -218,6 +264,7 @@ useEffect(() => {
         filteredData.length,
 
       completed,
+
       pending,
     };
   }, [filteredData]);
@@ -270,8 +317,8 @@ useEffect(() => {
               Live tracking for
               Academic Year
               2026/2027 enrollment
-              pipeline and document
-              completion.
+              pipeline and onboarding
+              progress.
             </p>
           </div>
 
@@ -288,7 +335,7 @@ useEffect(() => {
           />
         </div>
 
-        {/* KPI Cards */}
+        {/* KPI */}
         {loading ? (
           <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
             {[1, 2, 3].map(
@@ -327,73 +374,60 @@ useEffect(() => {
 
         {/* Chart */}
         <section className="mt-10 rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-3xl font-extrabold text-[#071739]">
-                Enrollment Stages
-              </h3>
+          <h3 className="text-3xl font-extrabold text-[#071739]">
+            Enrollment Stages
+          </h3>
 
-              <p className="mt-2 text-slate-500">
-                Distribution of
-                applicants by current
-                stage.
-              </p>
-            </div>
-          </div>
+          <p className="mt-2 text-slate-500">
+            Distribution of
+            applicants by current
+            stage.
+          </p>
 
-          <div className="mt-10 h-[350px]">
-            <ResponsiveContainer
-              width="100%"
-              height="100%"
-            >
-              <PieChart>
-                <Pie
-                  data={stageChartData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={120}
-                  innerRadius={70}
-                  dataKey="value"
-                >
-                  {stageChartData.map(
-                    (
-                      _,
-                      index
-                    ) => (
-                      <Cell
-                        key={index}
-                        fill={
-                          CHART_COLORS[
-                            index %
-                              CHART_COLORS.length
-                          ]
-                        }
-                      />
-                    )
-                  )}
-                </Pie>
+<div className="mt-10 flex justify-center">
+  <PieChart
+    width={500}
+    height={350}
+  >
+    <Pie
+      data={stageChartData}
+      cx="50%"
+      cy="50%"
+      outerRadius={120}
+      innerRadius={70}
+      dataKey="value"
+    >
+      {stageChartData.map(
+        (_, index) => (
+          <Cell
+            key={index}
+            fill={
+              CHART_COLORS[
+                index %
+                  CHART_COLORS.length
+              ]
+            }
+          />
+        )
+      )}
+    </Pie>
 
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+    <Tooltip />
+  </PieChart>
+</div>
         </section>
 
         {/* Table */}
         <section className="mt-10 rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-3xl font-extrabold text-[#071739]">
-                Enrollment Records
-              </h3>
+          <h3 className="text-3xl font-extrabold text-[#071739]">
+            Enrollment Records
+          </h3>
 
-              <p className="mt-2 text-slate-500">
-                Click student name to
-                view detailed
-                documents status.
-              </p>
-            </div>
-          </div>
+          <p className="mt-2 text-slate-500">
+            Click student to view
+            detailed enrollment
+            progress.
+          </p>
 
           <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-100">
             <table className="min-w-full text-sm">
@@ -438,7 +472,7 @@ useEffect(() => {
                           student
                         )
                       }
-                      className="cursor-pointer border-b border-slate-100 bg-white transition-all duration-200 hover:bg-blue-50"
+                      className="cursor-pointer border-b border-slate-100 bg-white transition hover:bg-blue-50"
                     >
                       <td className="px-5 py-4 font-bold text-[#071739]">
                         {
@@ -448,7 +482,7 @@ useEffect(() => {
                         }
                       </td>
 
-                      <td className="px-5 py-4 font-medium text-[#071739]">
+                      <td className="px-5 py-4">
                         {
                           student[
                             "Grade Applying"
@@ -456,7 +490,7 @@ useEffect(() => {
                         }
                       </td>
 
-                      <td className="px-5 py-4 font-medium text-[#071739]">
+                      <td className="px-5 py-4">
                         {
                           student[
                             "Nationality Type"
@@ -464,7 +498,7 @@ useEffect(() => {
                         }
                       </td>
 
-                      <td className="px-5 py-4 font-medium text-[#071739]">
+                      <td className="px-5 py-4">
                         {
                           student[
                             "Payment Type"
@@ -491,7 +525,7 @@ useEffect(() => {
                         </span>
                       </td>
 
-                      <td className="px-5 py-4 font-medium text-[#071739]">
+                      <td className="px-5 py-4">
                         {
                           student[
                             "PIC"
@@ -506,7 +540,7 @@ useEffect(() => {
           </div>
         </section>
 
-        {/* Modal */}
+        {/* MODAL */}
         {selectedStudent && (
           <StudentModal
             student={
@@ -529,6 +563,7 @@ function StudentModal({
   onClose,
 }: {
   student: EnrollmentStudent;
+
   onClose: () => void;
 }) {
   const requiredDocs =
@@ -557,6 +592,23 @@ function StudentModal({
     "Report Card 3 Years",
   ];
 
+  const onboardingItems = [
+    "Admissions NJIS System",
+    "NJIS System Waived",
+    "Acceptance Letter",
+    "Inform Finance to Invoice",
+    "Student Data List (SDL) & LS US SDL",
+    "Toddle",
+    "Emergency Bag",
+    "Toddle Health",
+    "Toddle Flags",
+    "Birthday List",
+    "Parents Business List",
+    "Student ID",
+    "Nationality Flags",
+    "Scan Documents",
+  ];
+
   const completedRequired =
     requiredDocs.filter(
       (doc) => {
@@ -566,12 +618,9 @@ function StudentModal({
           ];
 
         return (
-          value ===
-            "TRUE" ||
-          value ===
-            "Yes" ||
-          value ===
-            "Complete"
+          value === "TRUE" ||
+          value === "Yes" ||
+          value === "Complete"
         );
       }
     ).length;
@@ -589,12 +638,11 @@ function StudentModal({
       onClick={onClose}
     >
       <div
-        className="max-h-[92vh] w-full max-w-6xl overflow-y-auto rounded-[36px] border border-white/30 bg-white p-8 shadow-2xl"
+        className="max-h-[92vh] w-full max-w-7xl overflow-y-auto rounded-[36px] bg-white p-8 shadow-2xl"
         onClick={(e) =>
           e.stopPropagation()
         }
       >
-        {/* Header */}
         <div className="flex items-start justify-between">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600">
@@ -608,28 +656,16 @@ function StudentModal({
                 ]
               }
             </h2>
-
-            <p className="mt-3 text-lg text-slate-500">
-              Applying for Grade{" "}
-              <span className="font-bold text-[#071739]">
-                {
-                  student[
-                    "Grade Applying"
-                  ]
-                }
-              </span>
-            </p>
           </div>
 
           <button
             onClick={onClose}
-            className="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-100"
+            className="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-600 hover:bg-slate-100"
           >
             Close
           </button>
         </div>
 
-        {/* Progress */}
         <div className="mt-10 rounded-[28px] bg-slate-50 p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -646,16 +682,12 @@ function StudentModal({
               <p className="text-5xl font-extrabold text-green-600">
                 {progress}%
               </p>
-
-              <p className="mt-1 text-sm text-slate-500">
-                Completed
-              </p>
             </div>
           </div>
 
           <div className="mt-6 h-4 overflow-hidden rounded-full bg-slate-200">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-green-400 to-green-600 transition-all duration-700"
+              className="h-full rounded-full bg-gradient-to-r from-green-400 to-green-600"
               style={{
                 width: `${progress}%`,
               }}
@@ -663,7 +695,7 @@ function StudentModal({
           </div>
         </div>
 
-        {/* Overview */}
+        {/* OVERVIEW */}
         <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
           <DetailCard
             title="Nationality"
@@ -684,10 +716,10 @@ function StudentModal({
           />
 
           <DetailCard
-            title="Current Stage"
+            title="Final Status"
             value={
               student[
-                "Current Stage"
+                "Final Status"
               ]
             }
           />
@@ -698,86 +730,155 @@ function StudentModal({
           />
         </div>
 
-        {/* Required Documents */}
-        <div className="mt-12">
-          <h3 className="text-3xl font-extrabold text-[#071739]">
-            Required Documents
-          </h3>
+        {/* REQUIRED DOCS */}
+        <SectionTitle
+          title="Required Documents"
+        />
 
-          <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2">
-            {requiredDocs.map(
-              (doc) => {
-                const value =
-                  student[
-                    doc as keyof EnrollmentStudent
-                  ];
+        <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2">
+          {requiredDocs.map(
+            (doc) => {
+              const value =
+                student[
+                  doc as keyof EnrollmentStudent
+                ];
 
-                const completed =
-                  value ===
-                    "TRUE" ||
-                  value ===
-                    "Yes" ||
-                  value ===
-                    "Complete";
+              const completed =
+                value === "TRUE" ||
+                value === "Yes" ||
+                value === "Complete";
 
-                return (
-                  <DocumentCard
-                    key={doc}
-                    title={doc}
-                    completed={
-                      completed
-                    }
-                    required
-                  />
-                );
-              }
-            )}
-          </div>
+              return (
+                <StatusCard
+                  key={doc}
+                  title={doc}
+                  completed={
+                    completed
+                  }
+                  neutral={false}
+                />
+              );
+            }
+          )}
         </div>
 
-        {/* Optional Documents */}
-        <div className="mt-14">
-          <h3 className="text-3xl font-extrabold text-[#071739]">
-            Optional Documents
-          </h3>
+        {/* OPTIONAL DOCS */}
+        <SectionTitle
+          title="Optional Documents"
+        />
 
-          <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2">
-            {optionalDocs.map(
-              (doc) => {
-                const value =
-                  student[
-                    doc as keyof EnrollmentStudent
-                  ];
+        <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2">
+          {optionalDocs.map(
+            (doc) => {
+              const value =
+                student[
+                  doc as keyof EnrollmentStudent
+                ];
 
-                const completed =
-                  value ===
-                    "TRUE" ||
-                  value ===
-                    "Yes" ||
-                  value ===
-                    "Complete";
+              const completed =
+                value === "TRUE" ||
+                value === "Yes" ||
+                value === "Complete";
 
-                return (
-                  <DocumentCard
-                    key={doc}
-                    title={doc}
-                    completed={
-                      completed
-                    }
-                  />
-                );
-              }
-            )}
-          </div>
+              const neutral =
+                value === "" ||
+                value === "-" ||
+                value === null;
+
+              return (
+                <StatusCard
+                  key={doc}
+                  title={doc}
+                  completed={
+                    completed
+                  }
+                  neutral={
+                    neutral
+                  }
+                />
+              );
+            }
+          )}
         </div>
 
-        {/* Notes */}
-        <div className="mt-14 rounded-[28px] bg-slate-50 p-6">
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400">
-            Notes
+        {/* ONBOARDING */}
+        <SectionTitle
+          title="Onboarding Progress"
+        />
+
+        <div className="mt-6 rounded-2xl bg-blue-50 p-5">
+          <p className="text-xs font-bold uppercase tracking-wide text-blue-500">
+            Onboarding Status
           </p>
 
-          <p className="mt-4 text-base leading-relaxed text-slate-600">
+          <p className="mt-2 text-xl font-extrabold text-blue-700">
+            {
+              student[
+                "Onboarding Status"
+              ]
+            }
+          </p>
+        </div>
+
+        <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2">
+          {onboardingItems.map(
+            (item) => {
+              const value =
+                student[
+                  item as keyof EnrollmentStudent
+                ];
+
+              const completed =
+                value === "TRUE" ||
+                value === "Yes" ||
+                value === "Complete";
+
+              const neutral =
+                value === "" ||
+                value === "-" ||
+                value === null;
+
+              return (
+                <StatusCard
+                  key={item}
+                  title={item}
+                  completed={
+                    completed
+                  }
+                  neutral={
+                    neutral
+                  }
+                />
+              );
+            }
+          )}
+        </div>
+
+        {/* NOTES */}
+        <SectionTitle title="Notes" />
+
+        <div className="mt-6 rounded-[28px] bg-slate-50 p-6">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <DetailCard
+              title="Last Update"
+              value={
+                student[
+                  "Last Update"
+                ]
+              }
+            />
+
+            <DetailCard
+              title="Current Stage"
+              value={
+                student[
+                  "Current Stage"
+                ]
+              }
+            />
+          </div>
+
+          <p className="mt-8 text-base leading-relaxed text-slate-600">
             {student[
               "Notes"
             ] || "No notes available."}
@@ -788,11 +889,26 @@ function StudentModal({
   );
 }
 
+function SectionTitle({
+  title,
+}: {
+  title: string;
+}) {
+  return (
+    <div className="mt-14">
+      <h3 className="text-3xl font-extrabold text-[#071739]">
+        {title}
+      </h3>
+    </div>
+  );
+}
+
 function DetailCard({
   title,
   value,
 }: {
   title: string;
+
   value: string;
 }) {
   return (
@@ -808,58 +924,46 @@ function DetailCard({
   );
 }
 
-function DocumentCard({
+function StatusCard({
   title,
   completed,
-  required = false,
+  neutral,
 }: {
   title: string;
+
   completed: boolean;
-  required?: boolean;
+
+  neutral: boolean;
 }) {
   return (
     <div
-      className={`rounded-[24px] border p-5 transition-all duration-300 ${
+      className={`rounded-[24px] border p-5 ${
         completed
-          ? required
-            ? "border-green-200 bg-green-50"
-            : "border-blue-200 bg-blue-50"
-          : required
-          ? "border-red-200 bg-red-50"
-          : "border-slate-200 bg-slate-50"
+          ? "border-green-200 bg-green-50"
+          : neutral
+          ? "border-slate-200 bg-slate-50"
+          : "border-red-200 bg-red-50"
       }`}
     >
       <div className="flex items-center justify-between">
-        <div>
-          <h4 className="text-lg font-bold text-[#071739]">
-            {title}
-          </h4>
-
-          <p className="mt-1 text-sm text-slate-500">
-            {required
-              ? "Required Document"
-              : "Optional Document"}
-          </p>
-        </div>
+        <h4 className="text-base font-bold text-[#071739]">
+          {title}
+        </h4>
 
         <div
-          className={`rounded-full px-4 py-2 text-sm font-bold ${
+          className={`flex h-10 w-10 items-center justify-center rounded-full text-lg font-extrabold ${
             completed
-              ? required
-                ? "bg-green-100 text-green-700"
-                : "bg-blue-100 text-blue-700"
-              : required
-              ? "bg-red-100 text-red-700"
-              : "bg-slate-200 text-slate-600"
+              ? "bg-green-100 text-green-700"
+              : neutral
+              ? "bg-slate-200 text-slate-500"
+              : "bg-red-100 text-red-700"
           }`}
         >
           {completed
-            ? required
-              ? "Complete"
-              : "Uploaded"
-            : required
-            ? "Missing"
-            : "Not Uploaded"}
+            ? "✓"
+            : neutral
+            ? "—"
+            : "✕"}
         </div>
       </div>
     </div>
