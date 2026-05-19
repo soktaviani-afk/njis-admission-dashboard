@@ -656,7 +656,7 @@ export default function EnrollmentStatus() {
                   student
                 )
               }
-              className="cursor-pointer border-b border-slate-100 transition hover:bg-blue-50"
+              className="cursor-pointer border-b border-slate-100 bg-white transition-all duration-200 hover:bg-blue-50"
             >
               <td className="px-5 py-4 font-medium text-[#071739]">
                 {
@@ -666,7 +666,7 @@ export default function EnrollmentStatus() {
                 }
               </td>
 
-              <td className="px-5 py-4">
+              <td className="px-5 py-4 text-[#071739] font-medium">
                 {
                   student[
                     "Grade Applying"
@@ -674,7 +674,7 @@ export default function EnrollmentStatus() {
                 }
               </td>
 
-              <td className="px-5 py-4">
+              <td className="px-5 py-4 text-[#071739] font-medium">
                 <span
                   className={`rounded-full px-3 py-1 text-sm font-semibold ${
                     STAGE_STYLES[
@@ -692,7 +692,7 @@ export default function EnrollmentStatus() {
                 </span>
               </td>
 
-              <td className="px-5 py-4">
+              <td className="px-5 py-4 text-[#071739] font-medium">
                 {
                   student[
                     "Documents Status"
@@ -700,7 +700,7 @@ export default function EnrollmentStatus() {
                 }
               </td>
 
-              <td className="px-5 py-4">
+              <td className="px-5 py-4 text-[#071739] font-medium">
                 {
                   student[
                     "Onboarding Status"
@@ -708,7 +708,7 @@ export default function EnrollmentStatus() {
                 }
               </td>
 
-              <td className="px-5 py-4">
+              <td className="px-5 py-4 text-[#071739] font-medium">
                 {student["PIC"]}
               </td>
             </tr>
@@ -764,6 +764,119 @@ export default function EnrollmentStatus() {
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div className="mt-10">
+  <h3 className="text-xl font-bold text-[#071739]">
+    Document Checklist
+  </h3>
+
+  <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+    {[
+      "Enrollment Agreement",
+      "Media Release Form",
+      "Birth Certificate",
+      "Family Registry",
+      "Parents Passport",
+      "Parents ID",
+      "Child Passport",
+      "Child ID",
+      "KITAS",
+      "Student Health Card",
+      "Immunization Card",
+      "Report Card 3 Years",
+    ].map((doc) => {
+      const value =
+        selectedStudent[
+          doc as keyof EnrollmentStudent
+        ];
+
+      const completed =
+        value === "Complete";
+
+      return (
+        <div
+          key={doc}
+          className={`flex items-center justify-between rounded-2xl border p-4 ${
+            completed
+              ? "border-green-200 bg-green-50"
+              : "border-amber-200 bg-amber-50"
+          }`}
+        >
+          <span className="text-sm font-semibold text-[#071739]">
+            {doc}
+          </span>
+
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-bold ${
+              completed
+                ? "bg-green-100 text-green-700"
+                : "bg-amber-100 text-amber-700"
+            }`}
+          >
+            {completed
+              ? "Complete"
+              : "Pending"}
+          </span>
+        </div>
+      );
+    })}
+  </div>
+</div>
+
+<div className="mt-10">
+  <h3 className="text-xl font-bold text-[#071739]">
+    Onboarding Checklist
+  </h3>
+
+  <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+    {[
+      "Toddle",
+      "Emergency Bag",
+      "Toddle Health",
+      "Toddle Flags",
+      "Birthday List",
+      "Parents Business List",
+      "Student ID",
+      "Nationality Flags",
+      "Scan Documents",
+    ].map((item) => {
+      const value =
+        selectedStudent[
+          item as keyof EnrollmentStudent
+        ];
+
+      const completed =
+        value === "Complete";
+
+      return (
+        <div
+          key={item}
+          className={`flex items-center justify-between rounded-2xl border p-4 ${
+            completed
+              ? "border-green-200 bg-green-50"
+              : "border-amber-200 bg-amber-50"
+          }`}
+        >
+          <span className="text-sm font-semibold text-[#071739]">
+            {item}
+          </span>
+
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-bold ${
+              completed
+                ? "bg-green-100 text-green-700"
+                : "bg-amber-100 text-amber-700"
+            }`}
+          >
+            {completed
+              ? "Complete"
+              : "Pending"}
+          </span>
+        </div>
+      );
+    })}
+  </div>
+</div>
+
         <DetailCard
           title="Current Stage"
           value={
