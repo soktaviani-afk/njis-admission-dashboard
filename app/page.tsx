@@ -85,12 +85,6 @@ export default function LoginPage() {
           <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-[#071739]">
             Admissions Dashboard
           </h1>
-
-          <p className="mt-3 text-sm leading-relaxed text-slate-500">
-            Access enrollment analytics,
-            admissions tracking, and
-            operational monitoring.
-          </p>
         </div>
 
         {/* Inputs */}
