@@ -66,15 +66,15 @@ export default function LoginPage() {
         </div>
 
         {/* Logo */}
-        <div className="absolute right-8 top-8">
-<Image
-  src="/njis-logo.png"
-  alt="NJIS Logo"
-  width={80}
-  height={80}
-  className="h-16 w-16 rounded-xl bg-white object-contain p-2 shadow-md"
-/>
-        </div>
+<div className="absolute right-10 top-10">
+  <Image
+    src="/njis-logo.png"
+    alt="NJIS Logo"
+    width={140}
+    height={140}
+    className="object-contain drop-shadow-lg"
+  />
+</div>
 
         {/* Header */}
         <div className="mb-10 text-center">
