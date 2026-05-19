@@ -72,7 +72,7 @@ export default function LoginPage() {
   alt="NJIS Logo"
   width={60}
   height={60}
-  className="h-14 w-14 rounded-xl bg-white object-contain p-2 shadow-md"
+  className="h-16 w-16 rounded-xl bg-white object-contain p-2 shadow-md"
 />
         </div>
 
