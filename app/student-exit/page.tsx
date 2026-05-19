@@ -1,13 +1,9 @@
 "use client";
 
-import Image from "next/image";
+import Sidebar from "../components/layout/sidebar";
+import StatCard from "../components/cards/stat-card";
 
-import Link from "next/link";
-
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -31,36 +27,7 @@ const jakarta = Plus_Jakarta_Sans({
   ],
 });
 
-export default function StudentExit() {
-  const router = useRouter();
-
-  useEffect(() => {
-    const isAuthenticated =
-      localStorage.getItem(
-        "njis-auth"
-      );
-
-    if (!isAuthenticated) {
-      router.push("/");
-    }
-  }, [router]);
-
-const menuItems = [
-  {
-    name: "Homepage",
-    path: "/homepage",
-  },
-  {
-    name: "Enrollment Status",
-    path: "/enrollment-status",
-  },
-  {
-    name: "Student Exit Analysis",
-    path: "/student-exit",
-  },
-];
-
-type StudentExit = {
+type StudentExitData = {
   "Student Name": string;
   "Grade Level": string;
   "Academic Year": string;
@@ -85,8 +52,11 @@ const REASON_COLORS: Record<string, string> = {
 
 const TOTAL_STUDENTS = 1200;
 
-const [exitData, setExitData] =
-    useState<StudentExit[]>([]);
+export default function StudentExit() {
+  const router = useRouter();
+
+  const [exitData, setExitData] =
+    useState<StudentExitData[]>([]);
 
   const [loading, setLoading] =
     useState(true);
@@ -96,6 +66,15 @@ const [exitData, setExitData] =
 
   const [search, setSearch] =
     useState("");
+
+  useEffect(() => {
+    const isAuthenticated =
+      localStorage.getItem("njis-auth");
+
+    if (!isAuthenticated) {
+      router.push("/");
+    }
+  }, [router]);
 
   useEffect(() => {
     async function fetchSpreadsheetData() {
@@ -160,7 +139,7 @@ const [exitData, setExitData] =
     filteredData.reduce(
       (
         acc: Record<string, number>,
-        student: StudentExit
+        student
       ) => {
         const grade =
           student["Grade Level"] ||
@@ -185,7 +164,7 @@ const [exitData, setExitData] =
       filteredData.reduce(
         (
           acc: Record<string, number>,
-          student: StudentExit
+          student
         ) => {
           const reason =
             student[
@@ -223,55 +202,12 @@ const [exitData, setExitData] =
     <div
       className={`${jakarta.className} relative flex min-h-screen overflow-hidden bg-gradient-to-br from-white via-slate-50 to-slate-100`}
     >
+      <Sidebar />
+
       {/* Background Glow */}
       <div className="absolute right-0 top-0 h-[350px] w-[350px] rounded-full bg-blue-200 opacity-20 blur-3xl" />
 
       <div className="absolute left-20 top-40 h-[250px] w-[250px] rounded-full bg-slate-300 opacity-20 blur-3xl" />
-
-      {/* Sidebar */}
-      <aside className="z-10 hidden w-72 flex-col border-r border-white/10 bg-[#071739] p-6 text-white shadow-2xl md:flex">
-        <div className="flex items-center gap-4">
-<Image
-  src="/njis-logo.png"
-  alt="NJIS Logo"
-  width={52}
-  height={52}
-  style={{
-    width: "auto",
-    height: "auto",
-  }}
-  className="rounded-xl bg-white p-2"
-/>
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">
-              NJIS
-            </h1>
-
-            <p className="text-sm text-slate-300">
-              Admissions Dashboard
-            </p>
-          </div>
-        </div>
-
-        <nav className="mt-12 space-y-3">
-          {menuItems.map(
-            (item, index) => (
-              <Link
-                key={index}
-                href={item.path}
-                className={`block w-full rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
-                  item.name ===
-                  "Student Exit Analysis"
-                    ? "bg-white text-[#071739] shadow-xl"
-                    : "text-slate-300 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                {item.name}
-              </Link>
-            )
-          )}
-        </nav>
-      </aside>
 
       {/* Main Content */}
       <main className="z-10 flex-1 p-8 lg:p-10">
@@ -290,8 +226,7 @@ const [exitData, setExitData] =
             <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-500">
               Monitor student exit trends
               and retention insights with
-              live spreadsheet
-              integration.
+              live spreadsheet integration.
             </p>
           </div>
 
@@ -301,9 +236,7 @@ const [exitData, setExitData] =
               placeholder="Search student..."
               value={search}
               onChange={(e) =>
-                setSearch(
-                  e.target.value
-                )
+                setSearch(e.target.value)
               }
               className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
             />
@@ -317,16 +250,14 @@ const [exitData, setExitData] =
               }
               className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
             >
-              {academicYears.map(
-                (year) => (
-                  <option
-                    key={year}
-                    value={year}
-                  >
-                    {year}
-                  </option>
-                )
-              )}
+              {academicYears.map((year) => (
+                <option
+                  key={year}
+                  value={year}
+                >
+                  {year}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -335,9 +266,7 @@ const [exitData, setExitData] =
         <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           <StatCard
             title="Total Exits"
-            value={String(
-              totalExits
-            )}
+            value={String(totalExits)}
           />
 
           <StatCard
@@ -358,277 +287,41 @@ const [exitData, setExitData] =
 
         {/* Analytics */}
         <section className="mt-10 grid grid-cols-1 gap-8 xl:grid-cols-3">
-          {/* Pie Chart */}
           <div className="rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm xl:col-span-2">
             <h3 className="text-3xl font-bold text-[#071739]">
               Exit Reasons Analytics
             </h3>
 
-            <p className="mt-2 text-sm text-slate-500">
-              Distribution of student exits
-              by reason.
-            </p>
-
             <div className="mt-10 flex flex-col items-center">
-              <div className="overflow-x-auto">
-                <PieChart
-                  width={420}
-                  height={420}
+              <PieChart
+                width={420}
+                height={420}
+              >
+                <Pie
+                  data={reasonData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={150}
+                  innerRadius={75}
+                  dataKey="value"
                 >
-                  <Pie
-                    data={reasonData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={150}
-                    innerRadius={75}
-                    dataKey="value"
-                    paddingAngle={4}
-                    labelLine={false}
-                    label={({
-                      percent,
-                    }) =>
-                      `${(
-                        (percent || 0) *
-                        100
-                      ).toFixed(0)}%`
-                    }
-                  >
-                    {reasonData.map(
-                      (
-                        entry,
-                        index
-                      ) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={
-                            REASON_COLORS[
-                              entry.name.trim()
-                            ] ||
-                            "#94A3B8"
-                          }
-                          stroke="#fff"
-                          strokeWidth={4}
-                        />
-                      )
-                    )}
-                  </Pie>
-
-                  <Tooltip
-                    formatter={(
-                      value
-                    ) => [
-                      `${value} Students`,
-                      "Total",
-                    ]}
-                  />
-                </PieChart>
-              </div>
-
-              {/* Legend */}
-              <div className="mt-8 flex flex-wrap justify-center gap-6">
-                {reasonData.map(
-                  (
-                    item,
-                    index
-                  ) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-2"
-                    >
-                      <div
-                        className="h-4 w-4 rounded-full"
-                        style={{
-                          backgroundColor:
-                            REASON_COLORS[
-                              item.name.trim()
-                            ] ||
-                            "#94A3B8",
-                        }}
-                      />
-
-                      <span className="text-sm font-semibold text-slate-700">
-                        {item.name}
-                      </span>
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Summary */}
-          <div className="rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm">
-            <h3 className="text-3xl font-bold text-[#071739]">
-              Exit Summary
-            </h3>
-
-            <p className="mt-2 text-sm text-slate-500">
-              Student exit overview.
-            </p>
-
-            <div className="mt-8 space-y-3">
-              {reasonData.map(
-                (
-                  item,
-                  index
-                ) => (
-                  <div
-                    key={index}
-                    className="rounded-2xl border border-slate-100 bg-slate-50 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="h-3 w-3 rounded-full"
-                          style={{
-                            backgroundColor:
-                              REASON_COLORS[
-                                item.name.trim()
-                              ] ||
-                              "#94A3B8",
-                          }}
-                        />
-
-                        <p className="font-semibold text-[#071739]">
-                          {item.name}
-                        </p>
-                      </div>
-
-                      <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-bold text-blue-700">
-                        {item.value}
-                      </span>
-                    </div>
-
-                    <p className="mt-3 text-sm text-slate-500">
-                      {(
-                        (item.value /
-                          filteredData.length) *
-                        100
-                      ).toFixed(1)}
-                      % of total exits
-                    </p>
-                  </div>
-                )
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* Table */}
-        <section className="mt-10 rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <h3 className="text-3xl font-bold text-[#071739]">
-                Student Exit Records
-              </h3>
-
-              <p className="mt-2 text-sm text-slate-500">
-                Live spreadsheet synced
-                records.
-              </p>
-            </div>
-
-            <div className="rounded-full bg-green-100 px-5 py-2 text-sm font-semibold text-green-700">
-              Live Spreadsheet Connected
-            </div>
-          </div>
-
-          <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-100">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="bg-slate-50 text-left text-slate-500">
-                  <th className="px-5 py-4 font-bold">
-                    Student Name
-                  </th>
-
-                  <th className="px-5 py-4 font-bold">
-                    Grade Level
-                  </th>
-
-                  <th className="px-5 py-4 font-bold">
-                    Academic Year
-                  </th>
-
-                  <th className="px-5 py-4 font-bold">
-                    Reason
-                  </th>
-
-                  <th className="px-5 py-4 font-bold">
-                    Notes
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="py-16 text-center text-slate-400"
-                    >
-                      Loading spreadsheet
-                      data...
-                    </td>
-                  </tr>
-                ) : searchedData.length >
-                  0 ? (
-                  searchedData.map(
-                    (
-                      student,
-                      index
-                    ) => (
-                      <tr
+                  {reasonData.map(
+                    (entry, index) => (
+                      <Cell
                         key={index}
-                        className="border-t border-slate-100 transition-colors duration-200 hover:bg-blue-50/40"
-                      >
-                        <td className="px-5 py-4 font-medium text-[#071739]">
-                          {student[
-                            "Student Name"
-                          ] || "-"}
-                        </td>
-
-                        <td className="px-5 py-4 text-[#071739]">
-                          Grade{" "}
-                          {student[
-                            "Grade Level"
-                          ] || "-"}
-                        </td>
-
-                        <td className="px-5 py-4 text-[#071739]">
-                          {student[
-                            "Academic Year"
-                          ] || "-"}
-                        </td>
-
-                        <td className="px-5 py-4">
-                          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                            {student[
-                              "Reason for Leaving"
-                            ] || "-"}
-                          </span>
-                        </td>
-
-                        <td className="px-5 py-4 text-slate-500">
-                          {student[
-                            "Notes"
-                          ] || "-"}
-                        </td>
-                      </tr>
+                        fill={
+                          REASON_COLORS[
+                            entry.name.trim()
+                          ] || "#94A3B8"
+                        }
+                      />
                     )
-                  )
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="py-16 text-center text-slate-400"
-                    >
-                      No matching students
-                      found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </Pie>
+
+                <Tooltip />
+              </PieChart>
+            </div>
           </div>
         </section>
       </main>
@@ -644,7 +337,7 @@ function StatCard({
   value: string;
 }) {
   return (
-    <div className="rounded-[28px] border border-white bg-white/90 p-6 shadow-[0_10px_40px_rgba(15,23,42,0.06)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(15,23,42,0.12)]">
+    <div className="rounded-[28px] border border-white bg-white/90 p-6 shadow-[0_10px_40px_rgba(15,23,42,0.06)] backdrop-blur-sm">
       <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
         {title}
       </p>
