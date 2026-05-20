@@ -1,26 +1,52 @@
+import {
+  LucideIcon,
+} from "lucide-react";
+
 type StatCardProps = {
   title: string;
-  value: string;
+
+  value: string | number;
+
   subtitle?: string;
+
+  icon?: LucideIcon;
 };
 
 export default function StatCard({
   title,
   value,
   subtitle,
+  icon: Icon,
 }: StatCardProps) {
   return (
-    <div className="rounded-[28px] border border-white bg-white/90 p-6 shadow-[0_10px_40px_rgba(15,23,42,0.06)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(15,23,42,0.12)]">
-      <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-        {title}
-      </p>
+    <div className="group relative overflow-hidden rounded-[32px] border border-white/70 bg-white/85 p-7 shadow-[0_15px_50px_rgba(15,23,42,0.06)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_25px_70px_rgba(15,23,42,0.10)]">
+      {/* Glow */}
+      <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-blue-100/40 blur-3xl transition-all duration-500 group-hover:scale-125" />
 
-      <h3 className="mt-4 text-4xl font-extrabold tracking-tight text-[#071739]">
-        {value}
-      </h3>
+      {/* Top */}
+      <div className="relative flex items-start justify-between">
+        <div>
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400">
+            {title}
+          </p>
 
+          <h3 className="mt-5 text-5xl font-extrabold tracking-tight text-[#071739]">
+            {value}
+          </h3>
+        </div>
+
+        {Icon && (
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg">
+            <Icon
+              size={30}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Subtitle */}
       {subtitle && (
-        <p className="mt-3 text-sm text-slate-500">
+        <p className="relative mt-5 text-sm leading-relaxed text-slate-500">
           {subtitle}
         </p>
       )}

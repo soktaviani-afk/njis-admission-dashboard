@@ -87,11 +87,11 @@ export default function Topbar() {
 
             <h3 className="mt-1 text-xl font-extrabold text-[#071739]">
               Hi,{" "}
-              {currentUser?.username
+              {currentUser?.name
                 ?.split(".")[0]
                 ?.charAt(0)
                 ?.toUpperCase() +
-                currentUser?.username
+                currentUser?.name
                   ?.split(".")[0]
                   ?.slice(1) ||
                 "User"}
@@ -120,7 +120,7 @@ export default function Topbar() {
               <div>
                 <h3 className="text-xl font-extrabold text-[#071739]">
                   {
-                    currentUser?.username
+                    currentUser?.name
                   }
                 </h3>
 

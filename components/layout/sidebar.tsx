@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Users,
   GraduationCap,
+  FileText,
   Database,
   LogOut,
 } from "lucide-react";
@@ -33,6 +34,12 @@ const menuItems = [
     path: "/leads-database",
     icon: Database,
   },
+
+  {
+  name: "Internal Documents",
+  path: "/internal-documents",
+  icon: FileText,
+},
 
   {
     name: "Student Exit Analysis",
