@@ -397,20 +397,23 @@ export default function StudentExit() {
         innerRadius) *
         0.55;
 
-    const x =
-      cx +
-      radius *
-        Math.cos(
-          -midAngle * RADIAN
-        );
+const x =
+  cx +
+  radius *
+    Math.cos(
+      -(
+        midAngle || 0
+      ) * RADIAN
+    );
 
-    const y =
-      cy +
-      radius *
-        Math.sin(
-          -midAngle * RADIAN
-        );
-
+const y =
+  cy +
+  radius *
+    Math.sin(
+      -(
+        midAngle || 0
+      ) * RADIAN
+    );
     return (
       <text
         x={x}
@@ -425,7 +428,7 @@ export default function StudentExit() {
         className="text-[13px] font-bold"
       >
         {`${(
-          percent * 100
+          (percent || 0) * 100
         ).toFixed(0)}%`}
       </text>
     );
