@@ -418,7 +418,7 @@ export default function EnrollmentStatus() {
         </section>
 
         {/* Table */}
-        <section className="mt-10 rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+        <section className="mt-12 rounded-[36px] border border-white/60 bg-white/80 p-8 shadow-[0_25px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl">
           <h3 className="text-3xl font-extrabold text-[#071739]">
             Enrollment Records
           </h3>
@@ -429,10 +429,10 @@ export default function EnrollmentStatus() {
             progress.
           </p>
 
-          <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-100">
+          <div className="mt-8 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_10px_40px_rgba(15,23,42,0.05)]">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-500">
+                <tr className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100 text-left text-slate-500">
                   <th className="px-5 py-4 font-bold">
                     Student Name
                   </th>
@@ -465,16 +465,14 @@ export default function EnrollmentStatus() {
                     student,
                     index
                   ) => (
-                    <tr
-                      key={index}
-                      onClick={() =>
-                        setSelectedStudent(
-                          student
-                        )
-                      }
-                      className="cursor-pointer border-b border-slate-100 bg-white transition hover:bg-blue-50"
-                    >
-                      <td className="px-5 py-4 font-bold text-[#071739]">
+                  <tr
+                   key={index}
+                   onClick={() =>
+                   setSelectedStudent(student)
+                  }
+  className="group cursor-pointer border-b border-slate-100 bg-white/80 transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 hover:shadow-sm"
+>
+                     <td className="px-5 py-5 text-base font-bold text-[#071739]">
                         {
                           student[
                             "Student Name"
@@ -482,7 +480,7 @@ export default function EnrollmentStatus() {
                         }
                       </td>
 
-                      <td className="px-5 py-4">
+                      <td className="px-5 py-5 font-medium text-slate-700">
                         {
                           student[
                             "Grade Applying"
@@ -490,7 +488,7 @@ export default function EnrollmentStatus() {
                         }
                       </td>
 
-                      <td className="px-5 py-4">
+                      <td className="px-5 py-5 font-medium text-slate-700">
                         {
                           student[
                             "Nationality Type"
@@ -498,7 +496,7 @@ export default function EnrollmentStatus() {
                         }
                       </td>
 
-                      <td className="px-5 py-4">
+                        <td className="px-5 py-5 font-medium text-slate-700">
                         {
                           student[
                             "Payment Type"
@@ -506,9 +504,9 @@ export default function EnrollmentStatus() {
                         }
                       </td>
 
-                      <td className="px-5 py-4">
+                      <td className="px-5 py-5 font-medium text-slate-700">
                         <span
-                          className={`rounded-full px-3 py-1 text-xs font-bold ${
+                          className={`rounded-full px-4 py-1.5 text-xs font-bold shadow-sm backdrop-blur-sm ${
                             STAGE_STYLES[
                               student[
                                 "Current Stage"
@@ -525,7 +523,7 @@ export default function EnrollmentStatus() {
                         </span>
                       </td>
 
-                      <td className="px-5 py-4">
+                      <td className="px-5 py-5 font-medium text-slate-700">
                         {
                           student[
                             "PIC"

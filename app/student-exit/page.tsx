@@ -332,79 +332,138 @@ export default function StudentExit() {
           </div>
         )}
 
-        {/* Analytics */}
-        <section className="mt-10 grid grid-cols-1 gap-8 xl:grid-cols-3">
-          <div className="rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm xl:col-span-2">
-            <h3 className="text-3xl font-bold text-[#071739]">
-              Exit Reasons
-              Analytics
-            </h3>
+{/* Analytics */}
+<section className="mt-10 grid grid-cols-1 gap-8 xl:grid-cols-3">
+  {/* Chart */}
+  <div className="rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm xl:col-span-2">
+    <h3 className="text-3xl font-bold text-[#071739]">
+      Exit Reasons Analytics
+    </h3>
 
-            <div className="mt-10 flex flex-col items-center">
-              <PieChart
-                width={420}
-                height={420}
-              >
-                <Pie
-                  data={reasonData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={150}
-                  innerRadius={75}
-                  dataKey="value"
-                >
-                  {reasonData.map(
-                    (
-                      entry,
-                      index
-                    ) => (
-                      <Cell
-                        key={index}
-                        fill={
-                          REASON_COLORS[
-                            entry.name.trim()
-                          ] ||
-                          "#94A3B8"
-                        }
-                      />
-                    )
-                  )}
-                </Pie>
+    <div className="mt-10 flex flex-col items-center">
+      <PieChart
+        width={420}
+        height={420}
+      >
+        <Pie
+          data={reasonData}
+          cx="50%"
+          cy="50%"
+          outerRadius={150}
+          innerRadius={75}
+          dataKey="value"
+        >
+          {reasonData.map(
+            (
+              entry,
+              index
+            ) => (
+              <Cell
+                key={index}
+                fill={
+                  REASON_COLORS[
+                    entry.name.trim()
+                  ] ||
+                  "#94A3B8"
+                }
+              />
+            )
+          )}
+        </Pie>
 
-                <Tooltip />
-              </PieChart>
+        <Tooltip />
+      </PieChart>
+    </div>
+  </div>
 
-              <div className="mt-8 flex flex-wrap justify-center gap-5">
-                {reasonData.map(
-                  (
-                    item,
-                    index
-                  ) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-2"
-                    >
-                      <div
-                        className="h-4 w-4 rounded-full"
-                        style={{
-                          backgroundColor:
-                            REASON_COLORS[
-                              item.name.trim()
-                            ] ||
-                            "#94A3B8",
-                        }}
-                      />
+  {/* Summary */}
+  <div className="rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm">
+    <div className="flex items-center justify-between">
+      <div>
+        <h3 className="text-2xl font-bold text-[#071739]">
+          Exit Summary
+        </h3>
 
-                      <span className="text-sm font-semibold text-slate-700">
-                        {item.name}
-                      </span>
-                    </div>
-                  )
-                )}
+        <p className="mt-2 text-sm text-slate-500">
+          Breakdown of reasons and
+          impact overview.
+        </p>
+      </div>
+
+      <div className="rounded-2xl bg-blue-50 px-4 py-3">
+        <p className="text-xs font-bold uppercase tracking-wide text-blue-500">
+          Total
+        </p>
+
+        <p className="mt-1 text-2xl font-extrabold text-blue-700">
+          {totalExits}
+        </p>
+      </div>
+    </div>
+
+    <div className="mt-8 space-y-4">
+      {reasonData
+        .sort(
+          (a, b) =>
+            b.value - a.value
+        )
+        .map((item, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 p-4"
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="h-4 w-4 rounded-full"
+                style={{
+                  backgroundColor:
+                    REASON_COLORS[
+                      item.name.trim()
+                    ] ||
+                    "#94A3B8",
+                }}
+              />
+
+              <div>
+                <p className="font-bold text-[#071739]">
+                  {item.name}
+                </p>
+
+                <p className="text-sm text-slate-500">
+                  Exit Reason
+                </p>
               </div>
             </div>
+
+            <div className="text-right">
+              <p className="text-2xl font-extrabold text-[#071739]">
+                {item.value}
+              </p>
+
+              <p className="text-xs text-slate-500">
+                Students
+              </p>
+            </div>
           </div>
-        </section>
+        ))}
+    </div>
+
+    <div className="mt-8 rounded-2xl bg-slate-50 p-5">
+      <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+        Highest Impact
+      </p>
+
+      <p className="mt-2 text-xl font-extrabold text-[#071739]">
+        {topReason}
+      </p>
+
+      <p className="mt-1 text-sm text-slate-500">
+        Most common reason for
+        student exits.
+      </p>
+    </div>
+  </div>
+</section>
 
         {/* Student Exit Table */}
 <section className="mt-10 rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm">
