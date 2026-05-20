@@ -630,6 +630,28 @@ function StudentModal({
         100
     );
 
+    useEffect(() => {
+  function handleEscape(
+    event: KeyboardEvent
+  ) {
+    if (event.key === "Escape") {
+      onClose();
+    }
+  }
+
+  window.addEventListener(
+    "keydown",
+    handleEscape
+  );
+
+  return () => {
+    window.removeEventListener(
+      "keydown",
+      handleEscape
+    );
+  };
+}, [onClose]);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-md"
