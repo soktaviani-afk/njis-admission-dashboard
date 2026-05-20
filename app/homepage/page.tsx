@@ -11,12 +11,27 @@ import {
 } from "lucide-react";
 
 import {
+  Plus_Jakarta_Sans,
+} from "next/font/google";
+
+import {
   useEffect,
   useMemo,
   useState,
 } from "react";
 
 import { useRouter } from "next/navigation";
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: [
+    "400",
+    "500",
+    "600",
+    "700",
+    "800",
+  ],
+});
 
 type EnrollmentStudent = {
   "Current Stage": string;
@@ -105,7 +120,9 @@ useEffect(() => {
 }, [router]);
 
   return (
-    <div className="flex min-h-screen bg-slate-100">
+    <div
+  className={`${jakarta.className} flex min-h-screen bg-slate-100`}
+>
       <Sidebar />
 
       {/* Main Content */}

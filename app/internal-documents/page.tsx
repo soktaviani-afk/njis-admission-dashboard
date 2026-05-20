@@ -21,6 +21,21 @@ import {
   X,
 } from "lucide-react";
 
+import {
+  Plus_Jakarta_Sans,
+} from "next/font/google";
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: [
+    "400",
+    "500",
+    "600",
+    "700",
+    "800",
+  ],
+});
+
 interface DocumentItem {
   Date: string;
   "Document Type": string;
@@ -208,7 +223,9 @@ export default function InternalDocumentsPage() {
     }, [documents]);
 
   return (
-    <div className="flex min-h-screen bg-[#F4F7FB]">
+    <div
+  className={`${jakarta.className} flex min-h-screen bg-[#F4F7FB]`}
+>
       <Sidebar />
 
       <section className="flex-1 p-10">
@@ -545,11 +562,11 @@ export default function InternalDocumentsPage() {
                 />
               </button>
 
-              <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
+              <p className="text-sm font-bold uppercase tracking-[0.35em] text-blue-700">
                 Document Preview
               </p>
 
-              <h2 className="mt-4 text-4xl font-extrabold text-[#071739]">
+              <h2 className="mt-4 text-5xl font-extrabold tracking-tight text-[#071739]">
                 {
                   selectedDocument.Title
                 }
