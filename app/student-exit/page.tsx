@@ -405,6 +405,111 @@ export default function StudentExit() {
             </div>
           </div>
         </section>
+
+        {/* Student Exit Table */}
+<section className="mt-10 rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm">
+  <div className="flex items-center justify-between">
+    <div>
+      <h3 className="text-3xl font-bold text-[#071739]">
+        Student Exit Records
+      </h3>
+
+      <p className="mt-2 text-slate-500">
+        Live student exit data from
+        spreadsheet integration.
+      </p>
+    </div>
+
+    <div className="rounded-2xl bg-slate-100 px-5 py-3">
+      <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+        Showing
+      </p>
+
+      <p className="mt-1 text-lg font-extrabold text-[#071739]">
+        {searchedData.length} Records
+      </p>
+    </div>
+  </div>
+
+  <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-100">
+    <table className="min-w-full text-sm">
+      <thead>
+        <tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-500">
+          <th className="px-5 py-4 font-bold">
+            Student Name
+          </th>
+
+          <th className="px-5 py-4 font-bold">
+            Grade
+          </th>
+
+          <th className="px-5 py-4 font-bold">
+            Academic Year
+          </th>
+
+          <th className="px-5 py-4 font-bold">
+            Exit Reason
+          </th>
+
+          <th className="px-5 py-4 font-bold">
+            Notes
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {searchedData.map(
+          (student, index) => (
+            <tr
+              key={index}
+              className="border-b border-slate-100 transition hover:bg-blue-50"
+            >
+              <td className="px-5 py-4 font-bold text-[#071739]">
+                {
+                  student[
+                    "Student Name"
+                  ]
+                }
+              </td>
+
+              <td className="px-5 py-4 text-slate-700">
+                {
+                  student[
+                    "Grade Level"
+                  ]
+                }
+              </td>
+
+              <td className="px-5 py-4 text-slate-700">
+                {
+                  student[
+                    "Academic Year"
+                  ]
+                }
+              </td>
+
+              <td className="px-5 py-4">
+                <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-600">
+                  {
+                    student[
+                      "Reason for Leaving"
+                    ]
+                  }
+                </span>
+              </td>
+
+              <td className="max-w-[300px] px-5 py-4 text-slate-600">
+                {student["Notes"] ||
+                  "-"}
+              </td>
+            </tr>
+          )
+        )}
+      </tbody>
+    </table>
+  </div>
+</section>
+
       </main>
     </div>
   );
