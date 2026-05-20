@@ -19,13 +19,76 @@ export default function LoginPage() {
   ) {
     event.preventDefault();
 
-if (
-  username === "admin" &&
-  password === "njis2026"
-) {
+const USERS = [
+  {
+    username:
+      "nathalia.atmaja",
+    password:
+      "NJISNatalia26!",
+    role: "Marketing Manager",
+  },
+
+  {
+    username: "siska.wati",
+    password:
+      "NJISSiska26!",
+    role:
+      "Senior Admission Consultant",
+  },
+
+  {
+    username: "dewi.asmawi",
+    password:
+      "NJISDewi26!",
+    role:
+      "Admission Consultant",
+  },
+
+  {
+    username:
+      "sella.oktaviani",
+    password:
+      "NJISSuperAdmin26!",
+    role: "Super Admin",
+  },
+
+  {
+    username: "naomi",
+    password:
+      "NJISNaomi26!",
+    role:
+      "Secretary of School",
+  },
+
+  {
+    username:
+      "ezra.alexander",
+    password:
+      "NJISEzra26!",
+    role: "Head of School",
+  },
+];
+
+const matchedUser =
+  USERS.find(
+    (user) =>
+      user.username ===
+        username &&
+      user.password ===
+        password
+  );
+
+if (matchedUser) {
   localStorage.setItem(
     "njis-auth",
     "true"
+  );
+
+  localStorage.setItem(
+    "njis-user",
+    JSON.stringify(
+      matchedUser
+    )
   );
 
   router.push("/homepage");
