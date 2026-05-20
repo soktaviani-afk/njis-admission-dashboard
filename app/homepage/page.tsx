@@ -111,10 +111,25 @@ useEffect(() => {
       {/* Main Content */}
 <section className="flex-1 p-10">
   <Topbar />
+
+  {/* Header */}
+<div className="mt-8">
+  <p className="text-sm font-bold uppercase tracking-[0.35em] text-blue-700">
+    NJIS ADMISSIONS CRM
+  </p>
+
+  <h1 className="mt-4 text-5xl font-extrabold tracking-tight text-[#071739]">
+    Dashboard Overview
+  </h1>
+
+  <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-500">
+    Welcome back to NJIS internal admissions management system and operational dashboard.
+  </p>
+</div>
   
         {/* KPI */}
         {loading ? (
-          <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
             {[1, 2, 3, 4].map(
               (item) => (
                 <div
@@ -125,7 +140,7 @@ useEffect(() => {
             )}
           </div>
         ) : (
-          <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
             <StatCard
               title="Total Applicants"
               value={String(
@@ -155,14 +170,14 @@ useEffect(() => {
         )}
 
         {/* Quick Navigation */}
-        <div className="mt-10 grid grid-cols-1 gap-8 xl:grid-cols-2">
+        <div className="mt-8 grid grid-cols-1 gap-8 xl:grid-cols-2">
           <Link
             href="/enrollment-status"
             className="group rounded-[32px] bg-gradient-to-br from-[#071739] to-[#123D82] p-8 text-white shadow-[0_20px_60px_rgba(7,23,57,0.18)] transition-all duration-300 hover:-translate-y-2"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-blue-200">
+                <p className="text-sm uppercase tracking-[0.35em] text-blue-200">
                   Dashboard
                 </p>
 

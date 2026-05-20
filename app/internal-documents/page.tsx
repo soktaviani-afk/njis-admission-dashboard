@@ -256,17 +256,17 @@ export default function InternalDocumentsPage() {
         </section>
 
         {/* Controls */}
-        <section className="mt-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <section className="mt-10 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.35em] text-blue-700">
               Marketing Documents
             </p>
 
-            <h2 className="mt-3 text-4xl font-extrabold text-[#071739]">
+            <h1 className="mt-4 text-5xl font-extrabold tracking-tight text-[#071739]">
               Internal Documents
-            </h2>
+            </h1>
 
-            <p className="mt-3 text-slate-500">
+            <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-500">
               Internal tracking,
               approval monitoring,
               and archive system.
