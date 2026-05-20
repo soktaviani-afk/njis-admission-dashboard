@@ -516,20 +516,6 @@ const percentage =
                       </p>
                     </div>
                   </div>
-
-                  <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
-                    <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${Number(percentage)}%`,
-                        backgroundColor:
-                          REASON_COLORS[
-                            item.name.trim()
-                          ] ||
-                          "#94A3B8",
-                      }}
-                    />
-                  </div>
                 </div>
               );
             }
