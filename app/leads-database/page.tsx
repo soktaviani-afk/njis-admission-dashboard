@@ -2,6 +2,7 @@
 
 import Sidebar from "@/components/layout/sidebar";
 import StatCard from "@/components/cards/stat-card";
+import Topbar from "@/components/layout/topbar";
 
 import {
   useEffect,
@@ -332,7 +333,8 @@ export default function LeadsDatabase() {
     >
       <Sidebar />
 
-      <main className="flex-1 p-8 lg:p-10">
+<main className="flex-1 p-8 lg:p-10">
+  <Topbar />
         {/* Header */}
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>

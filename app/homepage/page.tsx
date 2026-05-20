@@ -25,6 +25,12 @@ type EnrollmentStudent = {
 export default function Homepage() {
   const router = useRouter();
 
+  const [currentUser, setCurrentUser] =
+  useState<any>(null);
+
+const [openProfile, setOpenProfile] =
+  useState(false);
+
   const [enrollmentData, setEnrollmentData] =
     useState<EnrollmentStudent[]>(
       []
@@ -92,16 +98,27 @@ export default function Homepage() {
     };
   }, [enrollmentData]);
 
-  useEffect(() => {
-    const isAuthenticated =
-      localStorage.getItem(
-        "njis-auth"
-      );
+useEffect(() => {
+  const isAuthenticated =
+    localStorage.getItem(
+      "njis-auth"
+    );
 
-    if (!isAuthenticated) {
-      router.push("/");
-    }
-  }, [router]);
+  const storedUser =
+    localStorage.getItem(
+      "njis-user"
+    );
+
+  if (!isAuthenticated) {
+    router.push("/");
+  }
+
+  if (storedUser) {
+    setCurrentUser(
+      JSON.parse(storedUser)
+    );
+  }
+}, [router]);
 
   return (
     <div className="flex min-h-screen bg-slate-100">

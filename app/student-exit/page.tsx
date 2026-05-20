@@ -2,6 +2,7 @@
 
 import Sidebar from "@/components/layout/sidebar";
 import StatCard from "@/components/cards/stat-card";
+import Topbar from "@/components/layout/topbar";
 
 import { useEffect, useState } from "react";
 
@@ -237,7 +238,8 @@ export default function StudentExit() {
       <div className="absolute left-20 top-40 h-[250px] w-[250px] rounded-full bg-slate-300 opacity-20 blur-3xl" />
 
       {/* Main Content */}
-      <main className="z-10 flex-1 p-8 lg:p-10">
+<main className="flex-1 p-8 lg:p-10">
+  <Topbar />
         {/* Header */}
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
