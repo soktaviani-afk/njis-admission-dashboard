@@ -2,6 +2,7 @@
 
 import Sidebar from "@/components/layout/sidebar";
 import StatCard from "@/components/cards/stat-card";
+import Topbar from "@/components/layout/topbar";
 
 import Link from "next/link";
 
@@ -24,12 +25,6 @@ type EnrollmentStudent = {
 
 export default function Homepage() {
   const router = useRouter();
-
-  const [currentUser, setCurrentUser] =
-  useState<any>(null);
-
-const [openProfile, setOpenProfile] =
-  useState(false);
 
   const [enrollmentData, setEnrollmentData] =
     useState<EnrollmentStudent[]>(
@@ -104,19 +99,8 @@ useEffect(() => {
       "njis-auth"
     );
 
-  const storedUser =
-    localStorage.getItem(
-      "njis-user"
-    );
-
   if (!isAuthenticated) {
     router.push("/");
-  }
-
-  if (storedUser) {
-    setCurrentUser(
-      JSON.parse(storedUser)
-    );
   }
 }, [router]);
 
@@ -125,36 +109,9 @@ useEffect(() => {
       <Sidebar />
 
       {/* Main Content */}
-      <section className="flex-1 p-10">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600">
-              NJIS INTERNAL PORTAL
-            </p>
-
-            <h1 className="mt-3 text-5xl font-extrabold tracking-tight text-[#071739]">
-              Admissions Homepage
-            </h1>
-
-            <p className="mt-4 text-slate-500">
-              Overview analytics and
-              operational monitoring
-              dashboard.
-            </p>
-          </div>
-
-          <div className="rounded-[28px] bg-white px-6 py-5 shadow-sm">
-            <p className="text-sm font-semibold text-slate-400">
-              Status
-            </p>
-
-            <h3 className="mt-2 text-2xl font-bold text-green-600">
-              System Active
-            </h3>
-          </div>
-        </div>
-
+<section className="flex-1 p-10">
+  <Topbar />
+  
         {/* KPI */}
         {loading ? (
           <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
