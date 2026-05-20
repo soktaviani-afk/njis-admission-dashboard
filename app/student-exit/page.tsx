@@ -334,132 +334,253 @@ export default function StudentExit() {
 
 {/* Analytics */}
 <section className="mt-10 grid grid-cols-1 gap-8 xl:grid-cols-3">
-  {/* Chart */}
-  <div className="rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm xl:col-span-2">
-    <h3 className="text-3xl font-bold text-[#071739]">
-      Exit Reasons Analytics
-    </h3>
-
-    <div className="mt-10 flex flex-col items-center">
-      <PieChart
-        width={420}
-        height={420}
-      >
-        <Pie
-          data={reasonData}
-          cx="50%"
-          cy="50%"
-          outerRadius={150}
-          innerRadius={75}
-          dataKey="value"
-        >
-          {reasonData.map(
-            (
-              entry,
-              index
-            ) => (
-              <Cell
-                key={index}
-                fill={
-                  REASON_COLORS[
-                    entry.name.trim()
-                  ] ||
-                  "#94A3B8"
-                }
-              />
-            )
-          )}
-        </Pie>
-
-        <Tooltip />
-      </PieChart>
-    </div>
-  </div>
-
-  {/* Summary */}
-  <div className="rounded-[32px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(2,6,23,0.08)] backdrop-blur-sm">
+  {/* Main Analytics */}
+  <div className="rounded-[36px] border border-white/70 bg-white/80 p-8 shadow-[0_25px_80px_rgba(2,6,23,0.08)] backdrop-blur-xl xl:col-span-2">
+    {/* Header */}
     <div className="flex items-center justify-between">
       <div>
-        <h3 className="text-2xl font-bold text-[#071739]">
-          Exit Summary
+        <h3 className="text-3xl font-extrabold text-[#071739]">
+          Exit Reasons Analytics
         </h3>
 
-        <p className="mt-2 text-sm text-slate-500">
-          Breakdown of reasons and
-          impact overview.
+        <p className="mt-2 text-slate-500">
+          Distribution of student
+          exit reasons across all
+          active records.
         </p>
       </div>
 
-      <div className="rounded-2xl bg-blue-50 px-4 py-3">
+      <div className="rounded-2xl bg-blue-50 px-5 py-4">
         <p className="text-xs font-bold uppercase tracking-wide text-blue-500">
-          Total
+          Total Exits
         </p>
 
-        <p className="mt-1 text-2xl font-extrabold text-blue-700">
+        <p className="mt-1 text-3xl font-extrabold text-blue-700">
           {totalExits}
         </p>
       </div>
     </div>
 
-    <div className="mt-8 space-y-4">
-      {reasonData
-        .sort(
-          (a, b) =>
-            b.value - a.value
-        )
-        .map((item, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 p-4"
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className="h-4 w-4 rounded-full"
-                style={{
-                  backgroundColor:
-                    REASON_COLORS[
-                      item.name.trim()
-                    ] ||
-                    "#94A3B8",
-                }}
-              />
+    {/* Content */}
+    <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
+      {/* Pie Chart */}
+      <div className="flex items-center justify-center">
+        <PieChart
+          width={380}
+          height={380}
+        >
+          <Pie
+  data={reasonData}
+  cx="50%"
+  cy="50%"
+  outerRadius={135}
+  innerRadius={78}
+  paddingAngle={4}
+  dataKey="value"
+  stroke="white"
+  strokeWidth={3}
+  labelLine={false}
+  label={({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+  }) => {
+    const RADIAN =
+      Math.PI / 180;
 
-              <div>
-                <p className="font-bold text-[#071739]">
-                  {item.name}
-                </p>
+    const radius =
+      innerRadius +
+      (outerRadius -
+        innerRadius) *
+        0.55;
 
-                <p className="text-sm text-slate-500">
-                  Exit Reason
-                </p>
-              </div>
-            </div>
+    const x =
+      cx +
+      radius *
+        Math.cos(
+          -midAngle * RADIAN
+        );
 
-            <div className="text-right">
-              <p className="text-2xl font-extrabold text-[#071739]">
-                {item.value}
-              </p>
+    const y =
+      cy +
+      radius *
+        Math.sin(
+          -midAngle * RADIAN
+        );
 
-              <p className="text-xs text-slate-500">
-                Students
-              </p>
-            </div>
-          </div>
-        ))}
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="white"
+        textAnchor={
+          x > cx
+            ? "start"
+            : "end"
+        }
+        dominantBaseline="central"
+        className="text-[13px] font-bold"
+      >
+        {`${(
+          percent * 100
+        ).toFixed(0)}%`}
+      </text>
+    );
+  }}
+>
+  {reasonData.map(
+    (entry, index) => (
+      <Cell
+        key={index}
+        fill={
+          REASON_COLORS[
+            entry.name.trim()
+          ] || "#94A3B8"
+        }
+      />
+    )
+  )}
+</Pie>
+
+          <Tooltip
+            formatter={(value) => [
+              `${value} Students`,
+            ]}
+          />
+        </PieChart>
+      </div>
+
+      {/* Summary */}
+      <div className="space-y-4">
+        {[...reasonData]
+          .sort(
+            (a, b) =>
+              b.value - a.value
+          )
+          .map(
+            (
+              item,
+              index
+            ) => {
+const percentage =
+  totalExits > 0
+    ? (
+        (item.value /
+          totalExits) *
+        100
+      ).toFixed(1)
+    : "0";
+
+              return (
+                <div
+                  key={index}
+                  className="rounded-2xl border border-slate-100 bg-gradient-to-r from-white to-slate-50 p-5 shadow-sm transition hover:shadow-md"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="h-5 w-5 rounded-full"
+                        style={{
+                          backgroundColor:
+                            REASON_COLORS[
+                              item.name.trim()
+                            ] ||
+                            "#94A3B8",
+                        }}
+                      />
+
+                      <div>
+                        <p className="font-bold text-[#071739]">
+                          {item.name}
+                        </p>
+
+                        <p className="mt-1 text-xs text-slate-500">
+                          Exit Category
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="text-2xl font-extrabold text-[#071739]">
+                        {item.value}
+                      </p>
+
+                      <p className="text-xs font-semibold text-slate-500">
+                        {percentage}%
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${Number(percentage)}%`,
+                        backgroundColor:
+                          REASON_COLORS[
+                            item.name.trim()
+                          ] ||
+                          "#94A3B8",
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            }
+          )}
+      </div>
     </div>
+  </div>
 
-    <div className="mt-8 rounded-2xl bg-slate-50 p-5">
-      <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+  {/* Right Side Cards */}
+  <div className="space-y-6">
+    <div className="rounded-[32px] border border-white/70 bg-white/80 p-7 shadow-[0_25px_80px_rgba(2,6,23,0.08)] backdrop-blur-xl">
+      <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
         Highest Impact
       </p>
 
-      <p className="mt-2 text-xl font-extrabold text-[#071739]">
+      <h3 className="mt-4 text-3xl font-extrabold leading-tight text-[#071739]">
         {topReason}
+      </h3>
+
+      <p className="mt-3 text-sm leading-relaxed text-slate-500">
+        Most common reason causing
+        student exits this academic
+        year.
+      </p>
+    </div>
+
+    <div className="rounded-[32px] bg-gradient-to-br from-blue-600 to-cyan-500 p-7 text-white shadow-[0_25px_80px_rgba(37,99,235,0.35)]">
+      <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-100">
+        Retention Rate
       </p>
 
-      <p className="mt-1 text-sm text-slate-500">
-        Most common reason for
-        student exits.
+      <h3 className="mt-4 text-6xl font-extrabold">
+        {retentionRate}%
+      </h3>
+
+      <p className="mt-4 text-sm leading-relaxed text-blue-100">
+        Overall student retention
+        compared to total active
+        student population.
+      </p>
+    </div>
+
+    <div className="rounded-[32px] border border-white/70 bg-white/80 p-7 shadow-[0_25px_80px_rgba(2,6,23,0.08)] backdrop-blur-xl">
+      <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
+        Most Affected Grade
+      </p>
+
+      <h3 className="mt-4 text-4xl font-extrabold text-[#071739]">
+        {mostAffectedGrade}
+      </h3>
+
+      <p className="mt-3 text-sm leading-relaxed text-slate-500">
+        Grade level with the highest
+        number of student exits.
       </p>
     </div>
   </div>
