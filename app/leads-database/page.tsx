@@ -340,61 +340,40 @@ export default function LeadsDatabase() {
   subtitle="Centralized lead management system for admissions sales, follow-up tracking, and conversion monitoring."
 />
 
-        {/* Header */}
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
-              Admissions CRM
-            </p>
+<div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+  <input
+    type="text"
+    placeholder="Search lead..."
+    value={search}
+    onChange={(e) =>
+      setSearch(
+        e.target.value
+      )
+    }
+    className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
+  />
 
-            <h1 className="mt-3 text-5xl font-extrabold tracking-tight text-[#071739]">
-              Leads Database
-            </h1>
-
-            <p className="mt-4 max-w-2xl text-slate-500">
-              Centralized lead
-              management system for
-              admissions sales,
-              follow-up tracking, and
-              conversion monitoring.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <input
-              type="text"
-              placeholder="Search lead..."
-              value={search}
-              onChange={(e) =>
-                setSearch(
-                  e.target.value
-                )
-              }
-              className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
-            />
-
-            <select
-              value={selectedPIC}
-              onChange={(e) =>
-                setSelectedPIC(
-                  e.target.value
-                )
-              }
-              className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
-            >
-              {picOptions.map(
-                (pic) => (
-                  <option
-                    key={pic}
-                    value={pic}
-                  >
-                    {pic}
-                  </option>
-                )
-              )}
-            </select>
-          </div>
-        </div>
+  <select
+    value={selectedPIC}
+    onChange={(e) =>
+      setSelectedPIC(
+        e.target.value
+      )
+    }
+    className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
+  >
+    {picOptions.map(
+      (pic) => (
+        <option
+          key={pic}
+          value={pic}
+        >
+          {pic}
+        </option>
+      )
+    )}
+  </select>
+</div>
 
         {/* KPI */}
         {loading ? (

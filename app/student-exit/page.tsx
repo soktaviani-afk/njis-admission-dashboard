@@ -233,12 +233,12 @@ export default function StudentExit() {
       <Sidebar />
 
       {/* Background Glow */}
-      <div className="absolute right-0 top-0 h-[350px] w-[350px] rounded-full bg-blue-200 opacity-20 blur-3xl" />
+      <div className="pointer-events-none absolute right-0 top-0 h-[350px] w-[350px] rounded-full bg-blue-200 opacity-20 blur-3xl" />
 
-      <div className="absolute left-20 top-40 h-[250px] w-[250px] rounded-full bg-slate-300 opacity-20 blur-3xl" />
+      <div className="pointer-events-none absolute left-20 top-40 h-[250px] w-[250px] rounded-full bg-slate-300 opacity-20 blur-3xl" />
 
       {/* Main Content */}
-<main className="flex-1 p-8 lg:p-10">
+<main className="relative z-10 flex-1 p-8 lg:p-10">
 
   <Topbar
   title="Student Exit Analysis"
