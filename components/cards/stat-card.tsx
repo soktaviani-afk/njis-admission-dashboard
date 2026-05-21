@@ -30,7 +30,7 @@ export default function StatCard({
             {title}
           </p>
 
-          <h3 className="mt-5 text-5xl font-extrabold tracking-tight text-[#071739]">
+          <h3 className="mt-5 break-words text-4xl font-extrabold leading-tight tracking-tight text-[#071739] xl:text-5xl">
             {value}
           </h3>
         </div>
