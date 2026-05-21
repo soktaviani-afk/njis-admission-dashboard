@@ -334,7 +334,12 @@ export default function LeadsDatabase() {
       <Sidebar />
 
 <main className="flex-1 p-8 lg:p-10">
-  <Topbar />
+
+  <Topbar
+  title="Leads Database"
+  subtitle="Centralized lead management system for admissions sales, follow-up tracking, and conversion monitoring."
+/>
+
         {/* Header */}
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>

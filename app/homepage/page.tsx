@@ -127,22 +127,11 @@ useEffect(() => {
 
       {/* Main Content */}
 <section className="flex-1 p-10">
-  <Topbar />
 
-  {/* Header */}
-<div className="mt-8">
-  <p className="text-sm font-bold uppercase tracking-[0.35em] text-blue-700">
-    NJIS ADMISSIONS CRM
-  </p>
-
-  <h1 className="mt-4 text-5xl font-extrabold tracking-tight text-[#071739]">
-    Dashboard Overview
-  </h1>
-
-  <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-500">
-    Welcome back to NJIS internal admissions management system and operational dashboard.
-  </p>
-</div>
+ <Topbar
+  title="Dashboard Overview"
+  subtitle="Welcome back to NJIS internal admissions management system and operational dashboard."
+/>
   
         {/* KPI */}
         {loading ? (
