@@ -303,38 +303,23 @@ export default function EnrollmentStatus() {
       <Sidebar />
 
 <main className="flex-1 p-8 lg:p-10">
-  <Topbar />
+  <Topbar
+  title="Enrollment Status"
+  subtitle="Live tracking for Academic Year 2026/2027 enrollment pipeline and onboarding progress."
+/>
 
-<div className="mt-8 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-  {/* LEFT */}
-  <div>
-    <p className="text-sm font-bold uppercase tracking-[0.35em] text-blue-700">
-      NJIS ADMISSIONS CRM
-    </p>
-
-    <h1 className="mt-4 text-5xl font-extrabold tracking-tight text-[#071739]">
-      Enrollment Status
-    </h1>
-
-    <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-500">
-      Live tracking for Academic Year 2026/2027 enrollment pipeline and onboarding progress.
-    </p>
-  </div>
-
-  {/* RIGHT */}
-  <div className="flex justify-end">
-    <input
-      type="text"
-      placeholder="Search student..."
-      value={searchTerm}
-      onChange={(e) =>
-        setSearchTerm(
-          e.target.value
-        )
-      }
-      className="h-14 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-medium text-[#071739] shadow-sm outline-none transition focus:border-blue-400"
-    />
-  </div>
+<div className="mt-6 flex justify-end">
+  <input
+    type="text"
+    placeholder="Search student..."
+    value={searchTerm}
+    onChange={(e) =>
+      setSearchTerm(
+        e.target.value
+      )
+    }
+    className="h-14 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-medium text-[#071739] shadow-sm outline-none transition focus:border-blue-400"
+  />
 </div>
 
         {/* KPI */}

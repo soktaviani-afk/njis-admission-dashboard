@@ -65,19 +65,19 @@ export default function Topbar({
   return (
     <div className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
       {/* Left */}
-      <div>
-        <p className="text-sm font-bold uppercase tracking-[0.35em] text-blue-700">
-          NJIS Admissions CRM
-        </p>
+<div>
+  <p className="text-sm font-bold uppercase tracking-[0.35em] text-blue-700">
+    NJIS Admissions CRM
+  </p>
 
-        <h1 className="mt-4 text-5xl font-extrabold tracking-tight text-[#071739]">
-          {title}
-        </h1>
+  <h1 className="mt-4 text-5xl font-extrabold tracking-tight text-[#071739]">
+    {title}
+  </h1>
 
-        <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-500">
-          {subtitle}
-        </p>
-      </div>
+  <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-500">
+    {subtitle}
+  </p>
+</div>
 
       {/* Right */}
       <div className="relative">
