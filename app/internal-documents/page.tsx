@@ -229,7 +229,11 @@ export default function InternalDocumentsPage() {
       <Sidebar />
 
       <section className="flex-1 p-10">
-        <Topbar />
+
+        <Topbar
+  title="Internal Documents"
+  subtitle="Internal tracking, approval monitoring, and archive system."
+/>
 
         {/* Analytics */}
         <section className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">

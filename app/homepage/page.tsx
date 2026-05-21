@@ -220,7 +220,7 @@ useEffect(() => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-slate-400">
+                <p className="text-sm uppercase tracking-[0.35em] text-slate-400">
                   Dashboard
                 </p>
 

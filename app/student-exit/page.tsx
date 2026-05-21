@@ -239,7 +239,12 @@ export default function StudentExit() {
 
       {/* Main Content */}
 <main className="flex-1 p-8 lg:p-10">
-  <Topbar />
+
+  <Topbar
+  title="Student Exit Analysis"
+  subtitle="Comprehensive analytics and insights for student withdrawal and retention monitoring."
+/>
+
         {/* Header */}
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
