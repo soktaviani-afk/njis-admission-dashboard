@@ -355,13 +355,12 @@ export default function StudentExit() {
           width={380}
           height={380}
         >
-          <Pie
+<Pie
   data={reasonData}
   cx="50%"
   cy="50%"
-  outerRadius={135}
-  innerRadius={78}
-  paddingAngle={4}
+  outerRadius={145}
+  paddingAngle={2}
   dataKey="value"
   stroke="white"
   strokeWidth={3}
