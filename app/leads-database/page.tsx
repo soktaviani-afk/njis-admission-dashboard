@@ -128,6 +128,9 @@ export default function LeadsDatabase() {
   const [selectedPIC, setSelectedPIC] =
     useState("All PIC");
 
+    const [selectedYear, setSelectedYear] =
+  useState("All Years");
+
   const [
     selectedLead,
     setSelectedLead,
@@ -179,27 +182,56 @@ export default function LeadsDatabase() {
     ),
   ];
 
-  const filteredLeads =
-    leads.filter((lead) => {
-      const matchesSearch =
-        lead[
-          "Child Name"
-        ]
-          ?.toLowerCase()
-          .includes(
-            search.toLowerCase()
-          );
+  const yearOptions = [
+  "All Years",
 
-      const matchesPIC =
-        selectedPIC ===
-          "All PIC" ||
-        lead.PIC === selectedPIC;
+  ...new Set(
+    leads.map((lead) => {
+      const date =
+        new Date(
+          lead.Timestamp
+        );
 
-      return (
-        matchesSearch &&
-        matchesPIC
-      );
-    });
+      return date.getFullYear().toString();
+    })
+  ),
+];
+
+const filteredLeads =
+  leads.filter((lead) => {
+    const matchesSearch =
+      lead[
+        "Child Name"
+      ]
+        ?.toLowerCase()
+        .includes(
+          search.toLowerCase()
+        );
+
+    const matchesPIC =
+      selectedPIC ===
+        "All PIC" ||
+      lead.PIC === selectedPIC;
+
+    const leadYear =
+      new Date(
+        lead.Timestamp
+      )
+        .getFullYear()
+        .toString();
+
+    const matchesYear =
+      selectedYear ===
+        "All Years" ||
+      leadYear ===
+        selectedYear;
+
+    return (
+      matchesSearch &&
+      matchesPIC &&
+      matchesYear
+    );
+  });
 
   const convertedLeads =
     filteredLeads.filter(
@@ -373,6 +405,64 @@ export default function LeadsDatabase() {
       )
     )}
   </select>
+  <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+  {/* SEARCH */}
+  <input
+    type="text"
+    placeholder="Search lead..."
+    value={search}
+    onChange={(e) =>
+      setSearch(
+        e.target.value
+      )
+    }
+    className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
+  />
+
+  {/* PIC */}
+  <select
+    value={selectedPIC}
+    onChange={(e) =>
+      setSelectedPIC(
+        e.target.value
+      )
+    }
+    className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
+  >
+    {picOptions.map(
+      (pic) => (
+        <option
+          key={pic}
+          value={pic}
+        >
+          {pic}
+        </option>
+      )
+    )}
+  </select>
+
+  {/* YEAR */}
+  <select
+    value={selectedYear}
+    onChange={(e) =>
+      setSelectedYear(
+        e.target.value
+      )
+    }
+    className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
+  >
+    {yearOptions.map(
+      (year) => (
+        <option
+          key={year}
+          value={year}
+        >
+          {year}
+        </option>
+      )
+    )}
+  </select>
+</div>
 </div>
 
         {/* KPI */}
