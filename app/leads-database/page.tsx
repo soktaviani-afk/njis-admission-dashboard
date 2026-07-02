@@ -128,8 +128,8 @@ export default function LeadsDatabase() {
   const [selectedPIC, setSelectedPIC] =
     useState("All PIC");
 
-    const [selectedYear, setSelectedYear] =
-  useState("All Years");
+  const [selectedYear, setSelectedYear] =
+    useState("All Years");
 
   const [
     selectedLead,
@@ -137,6 +137,16 @@ export default function LeadsDatabase() {
   ] = useState<LeadData | null>(
     null
   );
+
+  // 👇 Tambahkan di sini
+  const [currentPage, setCurrentPage] =
+    useState(1);
+
+  const [
+  itemsPerPage,
+  setItemsPerPage,
+] = useState(10);
+
 
   useEffect(() => {
     async function fetchLeads() {
@@ -165,6 +175,14 @@ export default function LeadsDatabase() {
     }
 
     fetchLeads();
+
+    useEffect(() => {
+  setCurrentPage(1);
+}, [
+  search,
+  selectedPIC,
+  selectedYear,
+]);
 
     const interval =
       setInterval(fetchLeads, 60000);
@@ -211,7 +229,8 @@ const filteredLeads =
     const matchesPIC =
       selectedPIC ===
         "All PIC" ||
-      lead.PIC === selectedPIC;
+      lead.PIC ===
+        selectedPIC;
 
     const leadYear =
       new Date(
@@ -233,43 +252,78 @@ const filteredLeads =
     );
   });
 
-  const convertedLeads =
-    filteredLeads.filter(
-      (lead) =>
-        lead.Converted === "Yes"
-    ).length;
+// ==============================
+// Pagination
+// ==============================
 
-  const conversionRate =
-    filteredLeads.length > 0
-      ? (
-          (convertedLeads /
-            filteredLeads.length) *
-          100
-        ).toFixed(1)
-      : "0";
+const totalPages =
+  Math.ceil(
+    filteredLeads.length /
+      itemsPerPage
+  );
 
-  const hotLeads =
-    filteredLeads.filter(
-      (lead) =>
-        lead[
-          "Lead Status"
-        ] === "Interested" ||
-        lead[
-          "Lead Status"
-        ] === "Observation"
-    ).length;
+const indexOfLastLead =
+  currentPage *
+  itemsPerPage;
 
-  const unassignedLeads =
-    filteredLeads.filter(
-      (lead) =>
-        !lead.PIC ||
-        lead.PIC === ""
-    ).length;
+const indexOfFirstLead =
+  indexOfLastLead -
+  itemsPerPage;
 
-  const sourceData = Object.entries(
+const currentLeads =
+  filteredLeads.slice(
+    indexOfFirstLead,
+    indexOfLastLead
+  );
+
+// ==============================
+// Dashboard Statistics
+// ==============================
+
+const convertedLeads =
+  filteredLeads.filter(
+    (lead) =>
+      lead.Converted ===
+      "Yes"
+  ).length;
+
+const conversionRate =
+  filteredLeads.length > 0
+    ? (
+        (convertedLeads /
+          filteredLeads.length) *
+        100
+      ).toFixed(1)
+    : "0";
+
+const hotLeads =
+  filteredLeads.filter(
+    (lead) =>
+      lead[
+        "Lead Status"
+      ] ===
+        "Interested" ||
+      lead[
+        "Lead Status"
+      ] ===
+        "Observation"
+  ).length;
+
+const unassignedLeads =
+  filteredLeads.filter(
+    (lead) =>
+      !lead.PIC ||
+      lead.PIC === ""
+  ).length;
+
+const sourceData =
+  Object.entries(
     filteredLeads.reduce(
       (
-        acc: Record<string, number>,
+        acc: Record<
+          string,
+          number
+        >,
         lead
       ) => {
         const source =
@@ -277,42 +331,48 @@ const filteredLeads =
           "Unknown";
 
         acc[source] =
-          (acc[source] || 0) + 1;
+          (acc[source] ||
+            0) + 1;
 
         return acc;
       },
       {}
     )
-  ).map(([name, value]) => ({
-    name,
-    value,
-  }));
-
-  const picPerformance =
-    Object.entries(
-      filteredLeads.reduce(
-        (
-          acc: Record<
-            string,
-            number
-          >,
-          lead
-        ) => {
-          const pic =
-            lead.PIC ||
-            "Unassigned";
-
-          acc[pic] =
-            (acc[pic] || 0) + 1;
-
-          return acc;
-        },
-        {}
-      )
-    ).map(([name, value]) => ({
+  ).map(
+    ([name, value]) => ({
       name,
       value,
-    }));
+    })
+  );
+
+const picPerformance =
+  Object.entries(
+    filteredLeads.reduce(
+      (
+        acc: Record<
+          string,
+          number
+        >,
+        lead
+      ) => {
+        const pic =
+          lead.PIC ||
+          "Unassigned";
+
+        acc[pic] =
+          (acc[pic] ||
+            0) + 1;
+
+        return acc;
+      },
+      {}
+    )
+  ).map(
+    ([name, value]) => ({
+      name,
+      value,
+    })
+  );
 
   function getDaysSince(
     timestamp: string
@@ -737,16 +797,16 @@ const filteredLeads =
                 </tr>
               </thead>
 
-              <tbody>
-                {filteredLeads.map(
-                  (
-                    lead,
-                    index
-                  ) => {
-                    const days =
-                      getDaysSince(
-                        lead.Timestamp
-                      );
+             <tbody>
+  {currentLeads.map(
+    (
+      lead,
+      index
+    ) => {
+      const days =
+        getDaysSince(
+          lead.Timestamp
+        );
 
                     return (
                       <tr
@@ -827,6 +887,120 @@ const filteredLeads =
               </tbody>
             </table>
           </div>
+{/* Pagination */}
+{totalPages > 1 && (
+  <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div className="flex items-center gap-3">
+      <span className="text-sm text-slate-500">
+        Show
+      </span>
+
+      <select
+        value={itemsPerPage}
+        onChange={(event) => {
+          setItemsPerPage(
+            Number(
+              event.target.value
+            )
+          );
+
+          setCurrentPage(1);
+        }}
+        className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+      >
+        <option value={10}>
+          10
+        </option>
+
+        <option value={25}>
+          25
+        </option>
+
+        <option value={50}>
+          50
+        </option>
+
+        <option value={100}>
+          100
+        </option>
+      </select>
+
+      <span className="text-sm text-slate-500">
+        entries
+      </span>
+    </div>
+
+    <p className="text-sm text-slate-500">
+      Showing{" "}
+      {filteredLeads.length === 0
+        ? 0
+        : indexOfFirstLead + 1}
+      –
+      {Math.min(
+        indexOfLastLead,
+        filteredLeads.length
+      )}{" "}
+      of{" "}
+      {filteredLeads.length}{" "}
+      leads
+    </p>
+
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() =>
+          setCurrentPage(
+            currentPage - 1
+          )
+        }
+        disabled={
+          currentPage === 1
+        }
+        className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        Previous
+      </button>
+
+      {Array.from(
+        {
+          length: totalPages,
+        },
+        (_, index) => (
+          <button
+            key={index}
+            onClick={() =>
+              setCurrentPage(
+                index + 1
+              )
+            }
+            className={`h-10 w-10 rounded-lg text-sm font-semibold transition ${
+              currentPage ===
+              index + 1
+                ? "bg-[#071739] text-white"
+                : "border border-slate-300 bg-white hover:bg-slate-100"
+            }`}
+          >
+            {index + 1}
+          </button>
+        )
+      )}
+
+      <button
+        onClick={() =>
+          setCurrentPage(
+            currentPage + 1
+          )
+        }
+        disabled={
+          currentPage ===
+          totalPages
+        }
+        className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+)}
         </section>
 
         {/* MODAL */}

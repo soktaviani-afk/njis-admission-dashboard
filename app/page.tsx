@@ -33,90 +33,28 @@ export default function LoginPage() {
   ) {
     event.preventDefault();
 
-    const USERS = [
-      {
-        name:
-          "Nathalia Atmaja",
+const USERS = [
+  {
+    name: "Admissions Team",
+    username: "admissions",
+    password: "njis12345",
+    role: "Admissions Team",
+  },
 
-        username:
-          "nathalia.atmaja",
+  {
+    name: "Sella Oktaviani",
+    username: "sella.oktaviani",
+    password: "NJISSuperAdmin26!",
+    role: "Super Admin",
+  },
 
-        password:
-          "NJISNatalia26!",
-
-        role:
-          "Marketing Manager",
-      },
-
-      {
-        name:
-          "Siska Wati",
-
-        username:
-          "siska.wati",
-
-        password:
-          "NJISSiska26!",
-
-        role:
-          "Senior Admission Consultant",
-      },
-
-      {
-        name:
-          "Dewi Asmawi Putri",
-
-        username:
-          "dewi.asmawi",
-
-        password:
-          "NJISDewi26!",
-
-        role:
-          "Admission Consultant",
-      },
-
-      {
-        name:
-          "Sella Oktaviani",
-
-        username:
-          "sella.oktaviani",
-
-        password:
-          "NJISSuperAdmin26!",
-
-        role:
-          "Super Admin",
-      },
-
-      {
-        name: "Naomi",
-
-        username:
-          "naomi",
-
-        password:
-          "NJISNaomi26!",
-
-        role:
-          "Secretary of School",
-      },
-
-      {
-        name:
-          "Ezra Alexander",
-
-        username:
-          "ezra.alexander",
-
-        password:
-          "NJISEzra26!",
-
-        role:
-          "Head of School",
-      },
-    ];
+  {
+    name: "Ezra Alexander",
+    username: "ezra.alexander",
+    password: "NJISEzra26!",
+    role: "Head of School",
+  },
+];
 
     const matchedUser =
       USERS.find(
