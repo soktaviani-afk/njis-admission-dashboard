@@ -1,90 +1,45 @@
 "use client";
 
 import Image from "next/image";
-
-import {
-  useState,
-} from "react";
-
-import {
-  useRouter,
-} from "next/navigation";
-
-import {
-  User,
-} from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { User } from "lucide-react";
 
 export default function LoginPage() {
-  const [
-    username,
-    setUsername,
-  ] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [
-    password,
-    setPassword,
-  ] = useState("");
+  const router = useRouter();
 
-  const router =
-    useRouter();
-
-  function handleLogin(
-    event: React.FormEvent
-  ) {
+  function handleLogin(event: React.FormEvent) {
     event.preventDefault();
 
-const USERS = [
-  {
-    name: "Admissions Team",
-    username: "admissions",
-    password: "njis12345",
-    role: "Admissions Team",
-  },
+    const DEMO_USER = {
+      name: "Admissions Team",
+      username: "admissions",
+      password: "NJIS2026",
+      role: "Admissions Team",
+    };
 
-  {
-    name: "Sella Oktaviani",
-    username: "sella.oktaviani",
-    password: "NJISSuperAdmin26!",
-    role: "Super Admin",
-  },
+    const isValidLogin =
+      username === DEMO_USER.username &&
+      password === DEMO_USER.password;
 
-  {
-    name: "Ezra Alexander",
-    username: "ezra.alexander",
-    password: "NJISEzra26!",
-    role: "Head of School",
-  },
-];
-
-    const matchedUser =
-      USERS.find(
-        (user) =>
-          user.username ===
-            username &&
-          user.password ===
-            password
-      );
-
-    if (matchedUser) {
-      localStorage.setItem(
-        "njis-auth",
-        "true"
-      );
+    if (isValidLogin) {
+      localStorage.setItem("njis-auth", "true");
 
       localStorage.setItem(
         "njis-user",
-        JSON.stringify(
-          matchedUser
-        )
+        JSON.stringify({
+          name: DEMO_USER.name,
+          username: DEMO_USER.username,
+          role: DEMO_USER.role,
+        })
       );
 
-      router.push(
-        "/homepage"
-      );
+      router.push("/homepage");
     } else {
-      alert(
-        "Invalid username or password"
-      );
+      alert("Invalid username or password");
     }
   }
 
@@ -109,20 +64,13 @@ const USERS = [
 
       {/* Login Card */}
       <form
-        onSubmit={
-          handleLogin
-        }
+        onSubmit={handleLogin}
         className="relative z-10 mt-16 w-full max-w-[620px] rounded-[36px] border border-white/20 bg-white/95 px-10 pb-10 pt-28 shadow-[0_35px_100px_rgba(0,0,0,0.30)] backdrop-blur-xl"
       >
         {/* Avatar */}
         <div className="absolute left-1/2 top-0 flex h-32 w-32 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#d9deea] shadow-2xl">
           <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-[#7C879B] to-[#98A2B3] text-[#d9deea]">
-            <User
-              size={78}
-              strokeWidth={
-                1.5
-              }
-            />
+            <User size={78} strokeWidth={1.5} />
           </div>
         </div>
 
@@ -148,10 +96,8 @@ const USERS = [
           </h1>
 
           <p className="mt-4 text-base text-slate-500">
-            Secure internal access
-            for admissions,
-            marketing, and school
-            management teams.
+            Secure internal access for admissions,
+            marketing, and school management teams.
           </p>
         </div>
 
@@ -162,14 +108,7 @@ const USERS = [
             type="text"
             placeholder="Username"
             value={username}
-            onChange={(
-              event
-            ) =>
-              setUsername(
-                event.target
-                  .value
-              )
-            }
+            onChange={(event) => setUsername(event.target.value)}
             className="h-14 rounded-full border border-slate-200 bg-slate-100 px-6 text-center text-lg font-semibold text-[#071739] outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
           />
 
@@ -178,14 +117,7 @@ const USERS = [
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(
-              event
-            ) =>
-              setPassword(
-                event.target
-                  .value
-              )
-            }
+            onChange={(event) => setPassword(event.target.value)}
             className="h-14 rounded-full border border-slate-200 bg-slate-100 px-6 text-center text-lg font-semibold text-[#071739] outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
           />
 
@@ -201,8 +133,7 @@ const USERS = [
         {/* Footer */}
         <div className="mt-10 border-t border-slate-200 pt-6 text-center">
           <p className="text-sm text-slate-400">
-            © 2026 NJIS Admissions
-            Dashboard
+            © 2026 NJIS Admissions Dashboard
           </p>
         </div>
       </form>

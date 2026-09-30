@@ -138,7 +138,6 @@ export default function LeadsDatabase() {
     null
   );
 
-  // 👇 Tambahkan di sini
   const [currentPage, setCurrentPage] =
     useState(1);
 
@@ -176,20 +175,20 @@ export default function LeadsDatabase() {
 
     fetchLeads();
 
-    useEffect(() => {
-  setCurrentPage(1);
-}, [
-  search,
-  selectedPIC,
-  selectedYear,
-]);
-
     const interval =
       setInterval(fetchLeads, 60000);
 
     return () =>
       clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+  setCurrentPage(1);
+}, [
+  search,
+  selectedPIC,
+  selectedYear,
+]);
 
   const picOptions = [
     "All PIC",
