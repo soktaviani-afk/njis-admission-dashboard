@@ -1,9 +1,23 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
 
-const genAI = new GoogleGenerativeAI(
-  process.env.GEMINI_API_KEY!
-);
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
+const apiKey = process.env.GEMINI_API_KEY;
+
+if (!apiKey) {
+  console.error("GEMINI_API_KEY is not configured.");
+}
+
+const ai = apiKey
+  ? new GoogleGenAI({
+      apiKey,
+    })
+  : null;
+
+const MODEL = "gemini-3.5-flash-lite";
 
 const ENROLLMENT_URL =
   "https://opensheet.elk.sh/1iBQf0dnRCCOC3NyoNYBDSzDaKHM-gI80XwKtGYMhpDA/MASTER_ENROLLMENT";
@@ -17,6 +31,10 @@ const STUDENT_EXIT_URL =
 const DOCUMENTS_URL =
   "https://opensheet.elk.sh/1e0senJvlGjTWxaOlAzcuocyjjlc_6EVWZ69u0cZX_Ig/DOCUMENT_TRACKER";
 
+/* =========================================================
+   FETCH HELPERS
+========================================================= */
+
 async function fetchJSON(url: string) {
   const response = await fetch(url, {
     cache: "no-store",
@@ -24,7 +42,7 @@ async function fetchJSON(url: string) {
 
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch data: ${response.status}`
+      `Failed to fetch admissions data: ${response.status} ${response.statusText}`
     );
   }
 
@@ -33,139 +51,90 @@ async function fetchJSON(url: string) {
   return Array.isArray(data) ? data : [];
 }
 
+/* =========================================================
+   DATA CLEANING
+========================================================= */
+
 function cleanEnrollmentData(data: any[]) {
   return data.map((student) => ({
-    studentName:
-      student["Student Name"] || "",
-    grade:
-      student["Grade Applying"] || "",
-    nationality:
-      student["Nationality Type"] || "",
-    academicYear:
-      student["Academic Year"] || "",
-    PIC:
-      student["PIC"] || "",
-    currentStage:
-      student["Current Stage"] || "",
-    documentsStatus:
-      student["Documents Status"] || "",
-    paymentType:
-      student["Payment Type"] || "",
-    finalStatus:
-      student["Final Status"] || "",
-    onboardingStatus:
-      student["Onboarding Status"] || "",
-    acceptanceLetter:
-      student["Acceptance Letter"] || "",
-    financeInvoice:
-      student["Inform Finance to Invoice"] || "",
-    toddle:
-      student["Toddle"] || "",
-    studentID:
-      student["Student ID"] || "",
-    nationalityFlags:
-      student["Nationality Flags"] || "",
-    scanDocuments:
-      student["Scan Documents"] || "",
-    lastUpdate:
-      student["Last Update"] || "",
-    notes:
-      student["Notes"] || "",
-    enrollmentAgreement:
-      student["Enrollment Agreement"] || "",
-    mediaRelease:
-      student["Media Release Form"] || "",
-    birthCertificate:
-      student["Birth Certificate"] || "",
-    familyRegistry:
-      student["Family Registry"] || "",
-    parentsPassport:
-      student["Parents Passport"] || "",
-    childPassport:
-      student["Child Passport"] || "",
-    childID:
-      student["Child ID"] || "",
-    KITAS:
-      student["KITAS"] || "",
-    healthCard:
-      student["Student Health Card"] || "",
-    immunization:
-      student["Immunization"] || "",
-    reportCard:
-      student["Report Card 3 Years"] || "",
+    studentName: student["Student Name"] || "",
+    grade: student["Grade Applying"] || "",
+    nationality: student["Nationality Type"] || "",
+    academicYear: student["Academic Year"] || "",
+    PIC: student["PIC"] || "",
+    currentStage: student["Current Stage"] || "",
+    documentsStatus: student["Documents Status"] || "",
+    paymentType: student["Payment Type"] || "",
+    finalStatus: student["Final Status"] || "",
+    onboardingStatus: student["Onboarding Status"] || "",
+    acceptanceLetter: student["Acceptance Letter"] || "",
+    financeInvoice: student["Inform Finance to Invoice"] || "",
+    toddle: student["Toddle"] || "",
+    studentID: student["Student ID"] || "",
+    nationalityFlags: student["Nationality Flags"] || "",
+    scanDocuments: student["Scan Documents"] || "",
+    lastUpdate: student["Last Update"] || "",
+    notes: student["Notes"] || "",
+    enrollmentAgreement: student["Enrollment Agreement"] || "",
+    mediaRelease: student["Media Release Form"] || "",
+    birthCertificate: student["Birth Certificate"] || "",
+    familyRegistry: student["Family Registry"] || "",
+    parentsPassport: student["Parents Passport"] || "",
+    childPassport: student["Child Passport"] || "",
+    childID: student["Child ID"] || "",
+    KITAS: student["KITAS"] || "",
+    healthCard: student["Student Health Card"] || "",
+    immunization: student["Immunization"] || "",
+    reportCard: student["Report Card 3 Years"] || "",
   }));
 }
 
 function cleanLeadsData(data: any[]) {
   return data.map((lead) => ({
-    timestamp:
-      lead["Timestamp"] || "",
-    source:
-      lead["Source"] || "",
-    childName:
-      lead["Child Name"] || "",
-    gender:
-      lead["Gender"] || "",
-    nationality:
-      lead["Nationality"] || "",
-    currentSchool:
-      lead["Current School"] || "",
-    currentGrade:
-      lead["Current Grade"] || "",
-    gradeToEnroll:
-      lead["Grade to Enroll"] || "",
-    PIC:
-      lead["PIC"] || "",
-    leadStatus:
-      lead["Lead Status"] || "",
-    converted:
-      lead["Converted"] || "",
-    academicYear:
-      lead["AC Year"] || "",
-    reasons:
-      lead["Reasons"] || "",
+    timestamp: lead["Timestamp"] || "",
+    source: lead["Source"] || "",
+    childName: lead["Child Name"] || "",
+    gender: lead["Gender"] || "",
+    nationality: lead["Nationality"] || "",
+    currentSchool: lead["Current School"] || "",
+    currentGrade: lead["Current Grade"] || "",
+    gradeToEnroll: lead["Grade to Enroll"] || "",
+    PIC: lead["PIC"] || "",
+    leadStatus: lead["Lead Status"] || "",
+    converted: lead["Converted"] || "",
+    academicYear: lead["AC Year"] || "",
+    reasons: lead["Reasons"] || "",
   }));
 }
 
 function cleanStudentExitData(data: any[]) {
   return data.map((student) => ({
-    studentName:
-      student["Student Name"] || "",
-    grade:
-      student["Grade Level"] || "",
-    academicYear:
-      student["Academic Year"] || "",
-    reason:
-      student["Reason for Leaving"] || "",
-    notes:
-      student["Notes"] || "",
+    studentName: student["Student Name"] || "",
+    grade: student["Grade Level"] || "",
+    academicYear: student["Academic Year"] || "",
+    reason: student["Reason for Leaving"] || "",
+    notes: student["Notes"] || "",
   }));
 }
 
 function cleanDocumentData(data: any[]) {
   return data.map((document) => ({
-    date:
-      document["Date"] || "",
-    documentType:
-      document["Document Type"] || "",
-    documentNumber:
-      document["Document Number"] || "",
-    title:
-      document["Title"] || "",
-    requestedBy:
-      document["Requested By"] || "",
-    approver:
-      document["Approver"] || "",
-    status:
-      document["Status"] || "",
-    priority:
-      document["Priority"] || "",
-    remarks:
-      document["Remarks"] || "",
-    lastUpdate:
-      document["Last Update"] || "",
+    date: document["Date"] || "",
+    documentType: document["Document Type"] || "",
+    documentNumber: document["Document Number"] || "",
+    title: document["Title"] || "",
+    requestedBy: document["Requested By"] || "",
+    approver: document["Approver"] || "",
+    status: document["Status"] || "",
+    priority: document["Priority"] || "",
+    remarks: document["Remarks"] || "",
+    lastUpdate: document["Last Update"] || "",
   }));
 }
+
+/* =========================================================
+   BUILD ADMISSIONS CONTEXT
+========================================================= */
 
 async function getAdmissionsContext() {
   const [
@@ -180,50 +149,29 @@ async function getAdmissionsContext() {
     fetchJSON(DOCUMENTS_URL),
   ]);
 
-  const enrollment =
-    cleanEnrollmentData(enrollmentRaw);
+  const enrollment = cleanEnrollmentData(enrollmentRaw);
+  const leads = cleanLeadsData(leadsRaw);
+  const studentExit = cleanStudentExitData(studentExitRaw);
+  const documents = cleanDocumentData(documentsRaw);
 
-  const leads =
-    cleanLeadsData(leadsRaw);
+  /* =======================================================
+     ENROLLMENT SUMMARY
+  ======================================================= */
 
-  const studentExit =
-    cleanStudentExitData(studentExitRaw);
+  const completedEnrollment = enrollment.filter(
+    (student) => student.finalStatus === "Completed"
+  ).length;
 
-  const documents =
-    cleanDocumentData(documentsRaw);
+  const inProgressEnrollment = enrollment.filter(
+    (student) => student.finalStatus === "In Progress"
+  ).length;
 
-  // =========================
-  // ENROLLMENT SUMMARY
-  // =========================
-
-  const completedEnrollment =
-    enrollment.filter(
-      (student) =>
-        student.finalStatus === "Completed"
-    ).length;
-
-  const inProgressEnrollment =
-    enrollment.filter(
-      (student) =>
-        student.finalStatus === "In Progress"
-    ).length;
-
-  const enrollmentStages: Record<
-    string,
-    number
-  > = {};
-
-  const enrollmentStatuses: Record<
-    string,
-    number
-  > = {};
+  const enrollmentStages: Record<string, number> = {};
+  const enrollmentStatuses: Record<string, number> = {};
 
   enrollment.forEach((student) => {
-    const stage =
-      student.currentStage || "Unknown";
-
-    const status =
-      student.finalStatus || "Unknown";
+    const stage = student.currentStage || "Unknown";
+    const status = student.finalStatus || "Unknown";
 
     enrollmentStages[stage] =
       (enrollmentStages[stage] || 0) + 1;
@@ -232,46 +180,32 @@ async function getAdmissionsContext() {
       (enrollmentStatuses[status] || 0) + 1;
   });
 
-  // =========================
-  // LEADS SUMMARY
-  // =========================
+  /* =======================================================
+     LEADS SUMMARY
+  ======================================================= */
 
-  const convertedLeads =
-    leads.filter(
-      (lead) =>
-        lead.converted === "Yes"
-    ).length;
+  const convertedLeads = leads.filter(
+    (lead) => lead.converted === "Yes"
+  ).length;
 
-  const hotLeads =
-    leads.filter(
-      (lead) =>
-        lead.leadStatus === "Interested" ||
-        lead.leadStatus === "Observation"
-    ).length;
+  const hotLeads = leads.filter(
+    (lead) =>
+      lead.leadStatus === "Interested" ||
+      lead.leadStatus === "Observation"
+  ).length;
 
-  const unassignedLeads =
-    leads.filter(
-      (lead) =>
-        !lead.PIC ||
-        lead.PIC.trim() === ""
-    ).length;
+  const unassignedLeads = leads.filter(
+    (lead) =>
+      !lead.PIC ||
+      lead.PIC.trim() === ""
+  ).length;
 
-  const leadStatuses: Record<
-    string,
-    number
-  > = {};
-
-  const leadSources: Record<
-    string,
-    number
-  > = {};
+  const leadStatuses: Record<string, number> = {};
+  const leadSources: Record<string, number> = {};
 
   leads.forEach((lead) => {
-    const status =
-      lead.leadStatus || "Unknown";
-
-    const source =
-      lead.source || "Unknown";
+    const status = lead.leadStatus || "Unknown";
+    const source = lead.source || "Unknown";
 
     leadStatuses[status] =
       (leadStatuses[status] || 0) + 1;
@@ -284,33 +218,22 @@ async function getAdmissionsContext() {
     leads.length > 0
       ? Number(
           (
-            (convertedLeads /
-              leads.length) *
+            (convertedLeads / leads.length) *
             100
           ).toFixed(1)
         )
       : 0;
 
-  // =========================
-  // STUDENT EXIT SUMMARY
-  // =========================
+  /* =======================================================
+     STUDENT EXIT SUMMARY
+  ======================================================= */
 
-  const exitReasons: Record<
-    string,
-    number
-  > = {};
-
-  const exitGrades: Record<
-    string,
-    number
-  > = {};
+  const exitReasons: Record<string, number> = {};
+  const exitGrades: Record<string, number> = {};
 
   studentExit.forEach((student) => {
-    const reason =
-      student.reason || "Unknown";
-
-    const grade =
-      student.grade || "Unknown";
+    const reason = student.reason || "Unknown";
+    const grade = student.grade || "Unknown";
 
     exitReasons[reason] =
       (exitReasons[reason] || 0) + 1;
@@ -319,26 +242,16 @@ async function getAdmissionsContext() {
       (exitGrades[grade] || 0) + 1;
   });
 
-  // =========================
-  // DOCUMENT SUMMARY
-  // =========================
+  /* =======================================================
+     DOCUMENT SUMMARY
+  ======================================================= */
 
-  const documentStatuses: Record<
-    string,
-    number
-  > = {};
-
-  const documentPriorities: Record<
-    string,
-    number
-  > = {};
+  const documentStatuses: Record<string, number> = {};
+  const documentPriorities: Record<string, number> = {};
 
   documents.forEach((document) => {
-    const status =
-      document.status || "Unknown";
-
-    const priority =
-      document.priority || "Unknown";
+    const status = document.status || "Unknown";
+    const priority = document.priority || "Unknown";
 
     documentStatuses[status] =
       (documentStatuses[status] || 0) + 1;
@@ -349,93 +262,88 @@ async function getAdmissionsContext() {
 
   return {
     overview: {
-      enrollmentRecords:
-        enrollment.length,
+      enrollmentRecords: enrollment.length,
       completedEnrollment,
       inProgressEnrollment,
 
-      leadRecords:
-        leads.length,
+      leadRecords: leads.length,
       convertedLeads,
       hotLeads,
       unassignedLeads,
       leadConversionRate,
 
-      studentExitRecords:
-        studentExit.length,
+      studentExitRecords: studentExit.length,
 
-      internalDocumentRecords:
-        documents.length,
+      internalDocumentRecords: documents.length,
     },
 
     enrollment: {
-      stages:
-        enrollmentStages,
-      statuses:
-        enrollmentStatuses,
-      records:
-        enrollment,
+      stages: enrollmentStages,
+      statuses: enrollmentStatuses,
+      records: enrollment,
     },
 
     leads: {
-      statuses:
-        leadStatuses,
-      sources:
-        leadSources,
-      records:
-        leads,
+      statuses: leadStatuses,
+      sources: leadSources,
+      records: leads,
     },
 
     studentExit: {
-      reasons:
-        exitReasons,
-      grades:
-        exitGrades,
-      records:
-        studentExit,
+      reasons: exitReasons,
+      grades: exitGrades,
+      records: studentExit,
     },
 
     internalDocuments: {
-      statuses:
-        documentStatuses,
-      priorities:
-        documentPriorities,
-      records:
-        documents,
+      statuses: documentStatuses,
+      priorities: documentPriorities,
+      records: documents,
     },
   };
 }
 
-export async function POST(
-  request: Request
-) {
+/* =========================================================
+   GEMINI HELPER
+========================================================= */
+
+async function generateAIResponse(prompt: string) {
+  if (!ai) {
+    throw new Error(
+      "GEMINI_API_KEY is missing. Please configure it in Vercel Environment Variables."
+    );
+  }
+
+  const response = await ai.models.generateContent({
+    model: MODEL,
+    contents: prompt,
+  });
+
+  const text = response.text;
+
+  if (!text) {
+    throw new Error(
+      "Gemini returned an empty response."
+    );
+  }
+
+  return text;
+}
+
+/* =========================================================
+   POST
+========================================================= */
+
+export async function POST(request: Request) {
   try {
-    const body =
-      await request.json();
+    const body = await request.json();
 
-    const {
-      mode,
-      question,
-    } = body;
+    const mode = body?.mode;
+    const question = body?.question;
 
-    const model =
-      genAI.getGenerativeModel({
-        model: "gemini-3.5-flash-lite",
-      });
-
-    const context =
-      await getAdmissionsContext();
-
-    const admissionsData =
-      JSON.stringify(
-        context,
-        null,
-        2
-      );
-
-    // =========================
-    // AI CHAT MODE
-    // =========================
+    /* =====================================================
+       VALIDATE CHAT REQUEST
+    ===================================================== */
 
     if (mode === "chat") {
       if (
@@ -444,15 +352,38 @@ export async function POST(
       ) {
         return NextResponse.json(
           {
-            error:
-              "Please provide a question.",
+            error: "Please provide a question.",
           },
           {
             status: 400,
           }
         );
       }
+    }
 
+    /* =====================================================
+       GET ADMISSIONS DATA
+    ===================================================== */
+
+    const context = await getAdmissionsContext();
+
+    /*
+      Prevent unnecessarily huge / unsafe prompt construction.
+      The complete operational data is still available to Gemini,
+      but we serialize it consistently.
+    */
+
+    const admissionsData = JSON.stringify(
+      context,
+      null,
+      2
+    );
+
+    /* =====================================================
+       AI CHAT MODE
+    ===================================================== */
+
+    if (mode === "chat") {
       const prompt = `
 You are NJIS Admissions Intelligence, an internal AI assistant for the NJIS Admissions and Business Office team.
 
@@ -472,14 +403,15 @@ IMPORTANT RULES:
 - You may combine information across multiple sources when useful.
 - Always distinguish between leads, enrollment records, student exits, and internal documents.
 - Do not assume that a lead is an enrolled student unless the data explicitly supports that.
-- Do not assume that an internal document is specifically an IOM unless the document type/title indicates it.
+- Do not assume that an internal document is specifically an IOM unless the document type or title indicates that.
 - Do not expose unnecessary personal contact information.
 - Focus on admissions operations and actionable business insight.
 - When comparing data, explain the relationship clearly.
 - Keep answers concise but useful.
-- If appropriate, mention which data sources you used.
+- If appropriate, mention which data source(s) you used.
 - Do not return JSON.
 - Use natural language.
+- Do not claim to have information that is not present in the supplied data.
 
 AVAILABLE NJIS DATA:
 
@@ -490,20 +422,16 @@ USER QUESTION:
 ${question}
 `;
 
-      const result =
-        await model.generateContent(
-          prompt
-        );
+      const text = await generateAIResponse(prompt);
 
       return NextResponse.json({
-        answer:
-          result.response.text(),
+        answer: text,
       });
     }
 
-    // =========================
-    // AI SUMMARY MODE
-    // =========================
+    /* =====================================================
+       AI SUMMARY MODE
+    ===================================================== */
 
     const prompt = `
 You are NJIS Admissions Intelligence, an AI assistant for the internal NJIS Admissions team.
@@ -528,6 +456,7 @@ Your task:
 You may cross-analyze the four data sources.
 
 IMPORTANT:
+
 - Only use information contained in the provided data.
 - Do not invent applicants, names, dates, numbers, or facts.
 - Focus on actionable admissions operations.
@@ -547,25 +476,21 @@ Return ONLY valid JSON in this exact structure:
 }
 `;
 
-    const result =
-      await model.generateContent(
-        prompt
-      );
+    const text = await generateAIResponse(prompt);
 
-    const text =
-      result.response.text();
-
-    let parsed;
+    let parsed: {
+      summary: string;
+      priorities: string[];
+      recommendation: string;
+    };
 
     try {
-      const cleanedText =
-        text
-          .replace(/```json/g, "")
-          .replace(/```/g, "")
-          .trim();
+      const cleanedText = text
+        .replace(/```json/gi, "")
+        .replace(/```/g, "")
+        .trim();
 
-      parsed =
-        JSON.parse(cleanedText);
+      parsed = JSON.parse(cleanedText);
     } catch {
       parsed = {
         summary: text,
@@ -575,9 +500,7 @@ Return ONLY valid JSON in this exact structure:
       };
     }
 
-    return NextResponse.json(
-      parsed
-    );
+    return NextResponse.json(parsed);
   } catch (error) {
     console.error(
       "Gemini Admissions AI error:",
