@@ -133,206 +133,141 @@ export default function Homepage() {
   // GENERATE AI SUMMARY
   // ==========================================
 
-  const generateAIInsight = async () => {
-    if (!enrollmentData.length) return;
+const generateAIInsight = async () => {
+  if (!enrollmentData.length) return;
 
-    try {
-      setAiLoading(true);
+  try {
+    setAiLoading(true);
 
-      const stageCounts: Record<string, number> = {};
-      const statusCounts: Record<string, number> = {};
-
-      enrollmentData.forEach((student) => {
-        const stage =
-          student["Current Stage"] || "Unknown";
-
-        const status =
-          student["Final Status"] || "Unknown";
-
-        stageCounts[stage] =
-          (stageCounts[stage] || 0) + 1;
-
-        statusCounts[status] =
-          (statusCounts[status] || 0) + 1;
-      });
-
-      const response = await fetch(
-        "/api/admissions-ai",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            totalApplicants:
-              dashboardStats.totalApplicants,
-
-            completed:
-              dashboardStats.activeEnrollment,
-
-            inProgress:
-              dashboardStats.inProgress,
-
-            completionRate:
-              dashboardStats.completionRate,
-
-            stageCounts,
-            statusCounts,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData =
-          await response
-            .json()
-            .catch(() => null);
-
-        throw new Error(
-          errorData?.error ||
-            `AI request failed with status ${response.status}`
-        );
+    const response = await fetch(
+      "/api/admissions-ai",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mode: "summary",
+        }),
       }
+    );
 
-      const result =
-        await response.json();
+    if (!response.ok) {
+      const errorData =
+        await response
+          .json()
+          .catch(() => null);
 
-      setAiInsight(result);
-    } catch (error) {
-      console.error(
-        "AI insight error:",
-        error
+      throw new Error(
+        errorData?.error ||
+          `AI request failed with status ${response.status}`
       );
-
-      setAiInsight({
-        summary:
-          "AI analysis is temporarily unavailable. Please try again.",
-        priorities: [],
-        recommendation:
-          "Refresh the analysis and try again.",
-      });
-    } finally {
-      setAiLoading(false);
     }
-  };
+
+    const result =
+      await response.json();
+
+    setAiInsight(result);
+  } catch (error) {
+    console.error(
+      "AI insight error:",
+      error
+    );
+
+    setAiInsight({
+      summary:
+        "AI analysis is temporarily unavailable. Please try again.",
+      priorities: [],
+      recommendation:
+        "Refresh the analysis and try again.",
+    });
+  } finally {
+    setAiLoading(false);
+  }
+};
 
   // ==========================================
   // ASK AI CHAT
   // ==========================================
 
-  const askAdmissionsAI = async (
-    customQuestion?: string
-  ) => {
-    const question =
-      customQuestion || chatQuestion.trim();
+ const askAdmissionsAI = async (
+  customQuestion?: string
+) => {
+  const question =
+    customQuestion ||
+    chatQuestion.trim();
 
-    if (
-      !question ||
-      !enrollmentData.length
-    ) {
-      return;
-    }
+  if (!question) return;
 
-    try {
-      setChatLoading(true);
+  try {
+    setChatLoading(true);
 
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          role: "user",
-          content: question,
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        content: question,
+      },
+    ]);
+
+    setChatQuestion("");
+
+    const response = await fetch(
+      "/api/admissions-ai",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
         },
-      ]);
-
-      setChatQuestion("");
-
-      const stageCounts: Record<string, number> = {};
-      const statusCounts: Record<string, number> = {};
-
-      enrollmentData.forEach((student) => {
-        const stage =
-          student["Current Stage"] || "Unknown";
-
-        const status =
-          student["Final Status"] || "Unknown";
-
-        stageCounts[stage] =
-          (stageCounts[stage] || 0) + 1;
-
-        statusCounts[status] =
-          (statusCounts[status] || 0) + 1;
-      });
-
-      const response = await fetch(
-        "/api/admissions-ai",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            mode: "chat",
-            question,
-
-            totalApplicants:
-              dashboardStats.totalApplicants,
-
-            completed:
-              dashboardStats.activeEnrollment,
-
-            inProgress:
-              dashboardStats.inProgress,
-
-            completionRate:
-              dashboardStats.completionRate,
-
-            stageCounts,
-            statusCounts,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData =
-          await response
-            .json()
-            .catch(() => null);
-
-        throw new Error(
-          errorData?.error ||
-            `AI request failed with status ${response.status}`
-        );
+        body: JSON.stringify({
+          mode: "chat",
+          question,
+        }),
       }
+    );
 
-      const result =
-        await response.json();
+    if (!response.ok) {
+      const errorData =
+        await response
+          .json()
+          .catch(() => null);
 
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          role: "ai",
-          content: result.answer,
-        },
-      ]);
-    } catch (error) {
-      console.error(
-        "AI chat error:",
-        error
+      throw new Error(
+        errorData?.error ||
+          `AI request failed with status ${response.status}`
       );
-
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          role: "ai",
-          content:
-            "Sorry, I couldn't analyze that right now. Please try again.",
-        },
-      ]);
-    } finally {
-      setChatLoading(false);
     }
-  };
+
+    const result =
+      await response.json();
+
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        content:
+          result.answer,
+      },
+    ]);
+  } catch (error) {
+    console.error(
+      "AI chat error:",
+      error
+    );
+
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        content:
+          "Sorry, I couldn't analyze the admissions data right now. Please try again.",
+      },
+    ]);
+  } finally {
+    setChatLoading(false);
+  }
+};
 
   // ==========================================
   // AUTHENTICATION
