@@ -39,18 +39,38 @@ type AIInsight = {
   recommendation: string;
 };
 
+type AIChatMessage = {
+  role: "user" | "ai";
+  content: string;
+};
+
 export default function Homepage() {
   const router = useRouter();
 
   const [enrollmentData, setEnrollmentData] =
     useState<EnrollmentStudent[]>([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
 
-  const [aiLoading, setAiLoading] = useState(false);
+  const [aiLoading, setAiLoading] =
+    useState(false);
 
   const [aiInsight, setAiInsight] =
     useState<AIInsight | null>(null);
+
+  const [chatQuestion, setChatQuestion] =
+    useState("");
+
+  const [chatMessages, setChatMessages] =
+    useState<AIChatMessage[]>([]);
+
+  const [chatLoading, setChatLoading] =
+    useState(false);
+
+  // ==========================================
+  // FETCH ADMISSIONS DATA
+  // ==========================================
 
   useEffect(() => {
     async function fetchData() {
@@ -73,6 +93,10 @@ export default function Homepage() {
 
     fetchData();
   }, []);
+
+  // ==========================================
+  // DASHBOARD STATISTICS
+  // ==========================================
 
   const dashboardStats = useMemo(() => {
     const totalApplicants =
@@ -104,6 +128,10 @@ export default function Homepage() {
       completionRate,
     };
   }, [enrollmentData]);
+
+  // ==========================================
+  // GENERATE AI SUMMARY
+  // ==========================================
 
   const generateAIInsight = async () => {
     if (!enrollmentData.length) return;
@@ -154,20 +182,27 @@ export default function Homepage() {
         }
       );
 
-if (!response.ok) {
-  const errorData = await response.json().catch(() => null);
+      if (!response.ok) {
+        const errorData =
+          await response
+            .json()
+            .catch(() => null);
 
-  throw new Error(
-    errorData?.error ||
-      `AI request failed with status ${response.status}`
-  );
-}
+        throw new Error(
+          errorData?.error ||
+            `AI request failed with status ${response.status}`
+        );
+      }
 
-      const result = await response.json();
+      const result =
+        await response.json();
 
       setAiInsight(result);
     } catch (error) {
-      console.error("AI insight error:", error);
+      console.error(
+        "AI insight error:",
+        error
+      );
 
       setAiInsight({
         summary:
@@ -181,6 +216,128 @@ if (!response.ok) {
     }
   };
 
+  // ==========================================
+  // ASK AI CHAT
+  // ==========================================
+
+  const askAdmissionsAI = async (
+    customQuestion?: string
+  ) => {
+    const question =
+      customQuestion || chatQuestion.trim();
+
+    if (
+      !question ||
+      !enrollmentData.length
+    ) {
+      return;
+    }
+
+    try {
+      setChatLoading(true);
+
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: "user",
+          content: question,
+        },
+      ]);
+
+      setChatQuestion("");
+
+      const stageCounts: Record<string, number> = {};
+      const statusCounts: Record<string, number> = {};
+
+      enrollmentData.forEach((student) => {
+        const stage =
+          student["Current Stage"] || "Unknown";
+
+        const status =
+          student["Final Status"] || "Unknown";
+
+        stageCounts[stage] =
+          (stageCounts[stage] || 0) + 1;
+
+        statusCounts[status] =
+          (statusCounts[status] || 0) + 1;
+      });
+
+      const response = await fetch(
+        "/api/admissions-ai",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            mode: "chat",
+            question,
+
+            totalApplicants:
+              dashboardStats.totalApplicants,
+
+            completed:
+              dashboardStats.activeEnrollment,
+
+            inProgress:
+              dashboardStats.inProgress,
+
+            completionRate:
+              dashboardStats.completionRate,
+
+            stageCounts,
+            statusCounts,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData =
+          await response
+            .json()
+            .catch(() => null);
+
+        throw new Error(
+          errorData?.error ||
+            `AI request failed with status ${response.status}`
+        );
+      }
+
+      const result =
+        await response.json();
+
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          content: result.answer,
+        },
+      ]);
+    } catch (error) {
+      console.error(
+        "AI chat error:",
+        error
+      );
+
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          content:
+            "Sorry, I couldn't analyze that right now. Please try again.",
+        },
+      ]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  // ==========================================
+  // AUTHENTICATION
+  // ==========================================
+
   useEffect(() => {
     const isAuthenticated =
       localStorage.getItem("njis-auth");
@@ -189,6 +346,10 @@ if (!response.ok) {
       router.push("/");
     }
   }, [router]);
+
+  // ==========================================
+  // UI
+  // ==========================================
 
   return (
     <div
@@ -203,7 +364,10 @@ if (!response.ok) {
           subtitle="Welcome back to NJIS internal admissions management system and operational dashboard."
         />
 
-        {/* KPI */}
+        {/* ==========================================
+            KPI
+        ========================================== */}
+
         {loading ? (
           <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
             {[1, 2, 3, 4].map((item) => (
@@ -245,7 +409,10 @@ if (!response.ok) {
           </div>
         )}
 
-        {/* AI ADMISSIONS INTELLIGENCE */}
+        {/* ==========================================
+            AI ADMISSIONS INTELLIGENCE
+        ========================================== */}
+
         <div className="mt-8 overflow-hidden rounded-[32px] bg-gradient-to-br from-[#071739] via-[#0B285A] to-[#123D82] p-8 text-white shadow-[0_20px_60px_rgba(7,23,57,0.20)]">
 
           <div className="flex flex-col gap-8 xl:flex-row xl:items-center xl:justify-between">
@@ -315,7 +482,10 @@ if (!response.ok) {
 
           </div>
 
-          {/* AI RESULTS */}
+          {/* ==========================================
+              AI RESULTS
+          ========================================== */}
+
           {aiInsight && (
             <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
 
@@ -353,6 +523,7 @@ if (!response.ok) {
                   )}
 
                 </div>
+
               </div>
 
               <div className="rounded-2xl border border-white/10 bg-white/10 p-6 backdrop-blur-sm">
@@ -372,18 +543,156 @@ if (!response.ok) {
 
         </div>
 
-        {/* QUICK NAVIGATION */}
+        {/* ==========================================
+            ASK ADMISSIONS AI
+        ========================================== */}
+
+        <div className="mt-6 rounded-[32px] bg-white p-8 shadow-sm">
+
+          <div className="flex items-center gap-3">
+
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#071739] text-white">
+              <BrainCircuit size={21} />
+            </div>
+
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#123D82]">
+                Ask Admissions AI
+              </p>
+
+              <p className="mt-1 text-sm text-slate-500">
+                Ask questions about your admissions data.
+              </p>
+            </div>
+
+          </div>
+
+          {/* CHAT HISTORY */}
+
+          {chatMessages.length > 0 && (
+            <div className="mt-6 max-h-[360px] space-y-4 overflow-y-auto pr-2">
+
+              {chatMessages.map(
+                (message, index) => (
+                  <div
+                    key={index}
+                    className={
+                      message.role === "user"
+                        ? "flex justify-end"
+                        : "flex justify-start"
+                    }
+                  >
+
+                    <div
+                      className={
+                        message.role === "user"
+                          ? "max-w-[80%] rounded-2xl rounded-br-md bg-[#071739] px-5 py-3 text-sm leading-6 text-white"
+                          : "max-w-[80%] rounded-2xl rounded-bl-md bg-slate-100 px-5 py-3 text-sm leading-6 text-slate-700"
+                      }
+                    >
+                      {message.content}
+                    </div>
+
+                  </div>
+                )
+              )}
+
+              {chatLoading && (
+                <div className="flex justify-start">
+                  <div className="rounded-2xl rounded-bl-md bg-slate-100 px-5 py-3 text-sm text-slate-500">
+                    Analyzing your admissions data...
+                  </div>
+                </div>
+              )}
+
+            </div>
+          )}
+
+          {/* SUGGESTED QUESTIONS */}
+
+          <div className="mt-6 flex flex-wrap gap-2">
+
+            {[
+              "What needs attention right now?",
+              "Which stage has the most applicants?",
+              "What is our biggest bottleneck?",
+            ].map((question) => (
+              <button
+                key={question}
+                onClick={() =>
+                  askAdmissionsAI(question)
+                }
+                disabled={
+                  chatLoading ||
+                  loading
+                }
+                className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-[#123D82] hover:bg-slate-50 disabled:opacity-50"
+              >
+                {question}
+              </button>
+            ))}
+
+          </div>
+
+          {/* CHAT INPUT */}
+
+          <div className="mt-4 flex gap-3">
+
+            <input
+              value={chatQuestion}
+              onChange={(e) =>
+                setChatQuestion(e.target.value)
+              }
+              onKeyDown={(e) => {
+                if (
+                  e.key === "Enter" &&
+                  !e.shiftKey
+                ) {
+                  e.preventDefault();
+                  askAdmissionsAI();
+                }
+              }}
+              placeholder="Ask anything about your admissions data..."
+              disabled={
+                chatLoading ||
+                loading
+              }
+              className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm outline-none transition focus:border-[#123D82] focus:bg-white"
+            />
+
+            <button
+              onClick={() =>
+                askAdmissionsAI()
+              }
+              disabled={
+                chatLoading ||
+                loading ||
+                !chatQuestion.trim()
+              }
+              className="rounded-2xl bg-[#071739] px-6 py-4 text-sm font-bold text-white transition hover:bg-[#123D82] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {chatLoading
+                ? "..."
+                : "Ask AI"}
+            </button>
+
+          </div>
+
+        </div>
+
+        {/* ==========================================
+            QUICK NAVIGATION
+        ========================================== */}
+
         <div className="mt-8 grid grid-cols-1 gap-8 xl:grid-cols-2">
 
           <Link
             href="/enrollment-status"
             className="group rounded-[32px] bg-gradient-to-br from-[#071739] to-[#123D82] p-8 text-white shadow-[0_20px_60px_rgba(7,23,57,0.18)] transition-all duration-300 hover:-translate-y-2"
           >
-
             <div className="flex items-center justify-between">
 
               <div>
-
                 <p className="text-sm uppercase tracking-[0.35em] text-blue-200">
                   Dashboard
                 </p>
@@ -397,24 +706,20 @@ if (!response.ok) {
                   onboarding, documents, and
                   student pipeline.
                 </p>
-
               </div>
 
               <ArrowRight className="transition duration-300 group-hover:translate-x-2" />
 
             </div>
-
           </Link>
 
           <Link
             href="/student-exit"
             className="group rounded-[32px] bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
           >
-
             <div className="flex items-center justify-between">
 
               <div>
-
                 <p className="text-sm uppercase tracking-[0.35em] text-slate-400">
                   Dashboard
                 </p>
@@ -428,13 +733,11 @@ if (!response.ok) {
                   academic trends, and retention
                   insights.
                 </p>
-
               </div>
 
               <ArrowRight className="text-[#071739] transition duration-300 group-hover:translate-x-2" />
 
             </div>
-
           </Link>
 
         </div>
