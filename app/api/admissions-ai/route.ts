@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     } = body;
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.5-flash-lite",
     });
 
     const prompt = `
@@ -86,19 +86,24 @@ Return ONLY valid JSON in this exact structure:
     }
 
     return NextResponse.json(parsed);
-  } catch (error) {
-    console.error(
-      "Gemini Admissions AI error:",
-      error
-    );
+} catch (error) {
+  console.error(
+    "Gemini Admissions AI error:",
+    error
+  );
 
-    return NextResponse.json(
-      {
-        error: "Unable to generate AI insight.",
-      },
-      {
-        status: 500,
-      }
-    );
-  }
+  const errorMessage =
+    error instanceof Error
+      ? error.message
+      : "Unknown server error";
+
+  return NextResponse.json(
+    {
+      error: errorMessage,
+    },
+    {
+      status: 500,
+    }
+  );
+}
 }

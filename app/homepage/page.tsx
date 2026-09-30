@@ -154,9 +154,14 @@ export default function Homepage() {
         }
       );
 
-      if (!response.ok) {
-        throw new Error("AI request failed");
-      }
+if (!response.ok) {
+  const errorData = await response.json().catch(() => null);
+
+  throw new Error(
+    errorData?.error ||
+      `AI request failed with status ${response.status}`
+  );
+}
 
       const result = await response.json();
 
