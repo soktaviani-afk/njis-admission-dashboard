@@ -17,7 +17,7 @@ const ai = apiKey
     })
   : null;
 
-const MODEL = "gemini-3.5-flash-lite";
+const MODEL = "gemini-3.8-flash"
 
 const ENROLLMENT_URL =
   "https://opensheet.elk.sh/1iBQf0dnRCCOC3NyoNYBDSzDaKHM-gI80XwKtGYMhpDA/MASTER_ENROLLMENT";
