@@ -331,6 +331,60 @@ async function generateAIResponse(prompt: string) {
 }
 
 /* =========================================================
+   GET — AI HEALTH CHECK
+========================================================= */
+
+export async function GET() {
+  const checkedAt = new Date().toISOString();
+
+  try {
+    if (!ai) {
+      return NextResponse.json(
+        {
+          status: "unavailable",
+          checkedAt,
+          reason: "GEMINI_API_KEY is not configured.",
+        },
+        { status: 503 }
+      );
+    }
+
+    const response = await ai.models.generateContent({
+      model: MODEL,
+      contents:
+        "Respond with exactly one word: READY",
+    });
+
+    const text = response.text?.trim();
+
+    if (!text) {
+      throw new Error("Gemini returned an empty health-check response.");
+    }
+
+    return NextResponse.json({
+      status: "ready",
+      checkedAt,
+      model: MODEL,
+    });
+  } catch (error) {
+    console.error("Gemini AI health check failed:", error);
+
+    return NextResponse.json(
+      {
+        status: "unavailable",
+        checkedAt,
+        model: MODEL,
+        reason:
+          error instanceof Error
+            ? error.message
+            : "Unknown Gemini error",
+      },
+      { status: 503 }
+    );
+  }
+}
+
+/* =========================================================
    POST
 ========================================================= */
 
