@@ -482,107 +482,48 @@ const picPerformance =
     >
       <Sidebar />
 
-<main className="flex-1 p-8 lg:p-10">
-
+<main className="flex-1 h-screen overflow-hidden p-4 lg:p-5">
+  
   <Topbar
   title="Leads Database"
   subtitle="Centralized lead management system for admissions sales, follow-up tracking, and conversion monitoring."
 />
 
-<div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+<div className="mt-3 flex flex-wrap justify-end gap-2">
   <input
     type="text"
     placeholder="Search lead..."
     value={search}
-    onChange={(e) =>
-      setSearch(
-        e.target.value
-      )
-    }
-    className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
+    onChange={(e) => setSearch(e.target.value)}
+    className="h-9 w-48 rounded-xl border border-slate-200 bg-white px-3 text-xs text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
   />
 
   <select
     value={selectedPIC}
-    onChange={(e) =>
-      setSelectedPIC(
-        e.target.value
-      )
-    }
-    className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
+    onChange={(e) => setSelectedPIC(e.target.value)}
+    className="h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
   >
-    {picOptions.map(
-      (pic) => (
-        <option
-          key={pic}
-          value={pic}
-        >
-          {pic}
-        </option>
-      )
-    )}
-  </select>
-  <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-  {/* SEARCH */}
-  <input
-    type="text"
-    placeholder="Search lead..."
-    value={search}
-    onChange={(e) =>
-      setSearch(
-        e.target.value
-      )
-    }
-    className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
-  />
-
-  {/* PIC */}
-  <select
-    value={selectedPIC}
-    onChange={(e) =>
-      setSelectedPIC(
-        e.target.value
-      )
-    }
-    className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
-  >
-    {picOptions.map(
-      (pic) => (
-        <option
-          key={pic}
-          value={pic}
-        >
-          {pic}
-        </option>
-      )
-    )}
+    {picOptions.map((pic) => (
+      <option key={pic} value={pic}>
+        {pic}
+      </option>
+    ))}
   </select>
 
-  {/* YEAR */}
   <select
     value={selectedYear}
-    onChange={(e) =>
-      setSelectedYear(
-        e.target.value
-      )
-    }
-    className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
+    onChange={(e) => setSelectedYear(e.target.value)}
+    className="h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
   >
-    {yearOptions.map(
-      (year) => (
-        <option
-          key={year}
-          value={year}
-        >
-          {year}
-        </option>
-      )
-    )}
+    {yearOptions.map((year) => (
+      <option key={year} value={year}>
+        {year}
+      </option>
+    ))}
   </select>
 </div>
-</div>
 
-<section className="mt-8 rounded-[32px] border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-8 shadow-[0_20px_60px_rgba(37,99,235,0.10)]">
+<section className="mt-3 rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-3 shadow-[0_20px_60px_rgba(37,99,235,0.10)]">
   <div className="flex flex-col gap-6">
     <div>
       <p className="text-xs font-extrabold uppercase tracking-[0.25em] text-blue-600">
@@ -612,7 +553,7 @@ const picPerformance =
           }
         }}
         placeholder="Ask: Which leads need follow-up?"
-        className="h-14 flex-1 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-medium text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
+        className="h-9 flex-1 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-medium text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
       />
 
       <button
@@ -621,7 +562,7 @@ const picPerformance =
           aiLoading ||
           !aiQuestion.trim()
         }
-        className="h-14 rounded-2xl bg-[#071739] px-7 text-sm font-extrabold text-white shadow-lg transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="h-9 rounded-2xl bg-[#071739] px-7 text-sm font-extrabold text-white shadow-lg transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {aiLoading
           ? "Thinking..."
@@ -671,7 +612,7 @@ const picPerformance =
 
         {/* KPI */}
         {loading ? (
-          <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-5">
+          <div className="mt-3 grid grid-cols-2 gap-2 xl:grid-cols-5">
             {[1, 2, 3, 4, 5].map(
               (item) => (
                 <div
@@ -682,7 +623,7 @@ const picPerformance =
             )}
           </div>
         ) : (
-          <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-5">
+          <div className="mt-3 grid grid-cols-2 gap-2 xl:grid-cols-5">
             <StatCard
               title="Total Leads"
               value={String(
@@ -719,24 +660,24 @@ const picPerformance =
         )}
 
         {/* Analytics */}
-        <section className="mt-10 grid grid-cols-1 gap-8 xl:grid-cols-3">
-          {/* Source Chart */}
-          <div className="rounded-[32px] border border-white/70 bg-white/80 p-8 shadow-[0_25px_80px_rgba(2,6,23,0.08)] backdrop-blur-xl">
-            <h3 className="text-2xl font-extrabold text-[#071739]">
-              Lead Sources
-            </h3>
+        <section className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-3">
+        {/* Source Chart */}
+        <div className="rounded-2xl border border-white/70 bg-white/80 p-3 shadow-sm backdrop-blur-xl">
+         <h3 className="text-sm font-extrabold text-[#071739]">
+          Lead Sources
+          </h3>
 
             <div className="mt-8 flex justify-center">
               <PieChart
-                width={320}
-                height={320}
+                width={210}
+                height={150}
               >
                 <Pie
                   data={sourceData}
                   cx="50%"
                   cy="50%"
-                  outerRadius={110}
-                  innerRadius={65}
+                  outerRadius={55}
+                  innerRadius={32}
                   dataKey="value"
                   labelLine={false}
                   label={({
@@ -772,12 +713,12 @@ const picPerformance =
           </div>
 
           {/* PIC Performance */}
-          <div className="rounded-[32px] border border-white/70 bg-white/80 p-8 shadow-[0_25px_80px_rgba(2,6,23,0.08)] backdrop-blur-xl xl:col-span-2">
-            <h3 className="text-2xl font-extrabold text-[#071739]">
-              PIC Performance
-            </h3>
+          <div className="rounded-2xl border border-white/70 bg-white/80 p-3 shadow-sm backdrop-blur-xl">
+  <h3 className="text-sm font-extrabold text-[#071739]">
+    PIC Performance
+  </h3>
 
-            <div className="mt-10 h-[320px]">
+            <div className="mt-1 h-[150px]">
               <ResponsiveContainer
                 width="100%"
                 height="100%"
@@ -810,10 +751,10 @@ const picPerformance =
         </section>
 
         {/* Priority Alerts */}
-        <section className="mt-10 rounded-[32px] border border-white/70 bg-white/80 p-8 shadow-[0_25px_80px_rgba(2,6,23,0.08)] backdrop-blur-xl">
+        <section className="mt-3 rounded-[32px] border border-white/70 bg-white/80 p-3 shadow-[0_25px_80px_rgba(2,6,23,0.08)] backdrop-blur-xl">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-3xl font-extrabold text-[#071739]">
+              <h3 className="text-base font-extrabold text-[#071739]">
                 Priority Follow Ups
               </h3>
 
@@ -824,7 +765,7 @@ const picPerformance =
             </div>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-3">
+          <div className="mt-2 grid grid-cols-2 gap-2 lg:grid-cols-3">
             {filteredLeads
               .filter(
                 (lead) =>
@@ -897,7 +838,7 @@ const picPerformance =
         </section>
 
         {/* Leads Table */}
-        <section className="mt-10 rounded-[36px] border border-white/70 bg-white/80 p-8 shadow-[0_25px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+        <section className="mt-3 rounded-2xl border border-white/70 bg-white/80 p-8 shadow-[0_25px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl">
           <h3 className="text-3xl font-extrabold text-[#071739]">
             Leads Database
           </h3>
@@ -907,7 +848,7 @@ const picPerformance =
             details.
           </p>
 
-          <div className="mt-8 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_10px_40px_rgba(15,23,42,0.05)]">
+          <div className="mt-2 max-h-[190px] overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm">
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100 text-left text-slate-500">
