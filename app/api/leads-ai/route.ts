@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
+import { isAuthenticated } from "@/lib/auth";
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -19,6 +20,17 @@ const MODELS = [
 ];
 
 export async function POST(request: Request) {
+  const authenticated = await isAuthenticated();
+
+  if (!authenticated) {
+    return NextResponse.json(
+      {
+        error: "Unauthorized.",
+      },
+      { status: 401 }
+    );
+  }
+
   try {
     if (!ai) {
       return NextResponse.json(
@@ -45,7 +57,7 @@ export async function POST(request: Request) {
 
     /*
      * Limit the amount of data sent to the AI.
-     * The AI only needs the information relevant
+     * The AI only needs information relevant
      * to sales/admissions analysis.
      */
     const safeLeads = leads.map((lead: any) => ({

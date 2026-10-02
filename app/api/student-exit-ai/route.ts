@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
+import { isAuthenticated } from "@/lib/auth";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -14,7 +15,19 @@ const MODELS = [
 ];
 
 export async function POST(request: Request) {
+  const authenticated = await isAuthenticated();
+
+  if (!authenticated) {
+    return NextResponse.json(
+      {
+        error: "Unauthorized.",
+      },
+      { status: 401 }
+    );
+  }
+
   try {
+    
     const body = await request.json();
 
     const { question, exitRecords } = body;

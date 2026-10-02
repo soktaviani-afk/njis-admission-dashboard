@@ -8,38 +8,71 @@ import { User } from "lucide-react";
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
 
-  function handleLogin(event: React.FormEvent) {
+  async function handleLogin(
+    event: React.FormEvent
+  ) {
     event.preventDefault();
 
-    const DEMO_USER = {
-      name: "Admissions Team",
-      username: "admissions",
-      password: "NJIS2026",
-      role: "Admissions Team",
-    };
+    if (loading) return;
 
-    const isValidLogin =
-      username === DEMO_USER.username &&
-      password === DEMO_USER.password;
+    setLoading(true);
 
-    if (isValidLogin) {
-      localStorage.setItem("njis-auth", "true");
+    try {
+      const response = await fetch(
+        "/api/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            username,
+            password,
+          }),
+        }
+      );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        alert(
+          data?.error ||
+            "Invalid username or password."
+        );
+
+        return;
+      }
+
+      localStorage.setItem(
+        "njis-auth",
+        "true"
+      );
 
       localStorage.setItem(
         "njis-user",
-        JSON.stringify({
-          name: DEMO_USER.name,
-          username: DEMO_USER.username,
-          role: DEMO_USER.role,
-        })
+        JSON.stringify(
+          data.user
+        )
       );
 
       router.push("/homepage");
-    } else {
-      alert("Invalid username or password");
+    } catch (error) {
+      console.error(
+        "Login request failed:",
+        error
+      );
+
+      alert(
+        "Unable to connect to the login service. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -70,7 +103,10 @@ export default function LoginPage() {
         {/* Avatar */}
         <div className="absolute left-1/2 top-0 flex h-32 w-32 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#d9deea] shadow-2xl">
           <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-[#7C879B] to-[#98A2B3] text-[#d9deea]">
-            <User size={78} strokeWidth={1.5} />
+            <User
+              size={78}
+              strokeWidth={1.5}
+            />
           </div>
         </div>
 
@@ -96,37 +132,48 @@ export default function LoginPage() {
           </h1>
 
           <p className="mt-4 text-base text-slate-500">
-            Secure internal access for admissions,
-            marketing, and school management teams.
+            Secure internal access for
+            admissions, marketing, and
+            school management teams.
           </p>
         </div>
 
         {/* Inputs */}
         <div className="mx-auto flex max-w-[460px] flex-col gap-6">
-          {/* Username */}
           <input
             type="text"
             placeholder="Username"
             value={username}
-            onChange={(event) => setUsername(event.target.value)}
+            autoComplete="username"
+            onChange={(event) =>
+              setUsername(
+                event.target.value
+              )
+            }
             className="h-14 rounded-full border border-slate-200 bg-slate-100 px-6 text-center text-lg font-semibold text-[#071739] outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
           />
 
-          {/* Password */}
           <input
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            autoComplete="current-password"
+            onChange={(event) =>
+              setPassword(
+                event.target.value
+              )
+            }
             className="h-14 rounded-full border border-slate-200 bg-slate-100 px-6 text-center text-lg font-semibold text-[#071739] outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
           />
 
-          {/* Login Button */}
           <button
             type="submit"
-            className="mt-4 rounded-full bg-[#071739] px-6 py-4 text-lg font-bold uppercase tracking-wide text-white transition-all duration-300 hover:-translate-y-1 hover:bg-[#12337a] hover:shadow-2xl"
+            disabled={loading}
+            className="mt-4 rounded-full bg-[#071739] px-6 py-4 text-lg font-bold uppercase tracking-wide text-white transition-all duration-300 hover:-translate-y-1 hover:bg-[#12337a] hover:shadow-2xl disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Login
+            {loading
+              ? "Signing in..."
+              : "Login"}
           </button>
         </div>
 
