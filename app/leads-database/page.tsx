@@ -1140,90 +1140,71 @@ export default function LeadsDatabase() {
 
           {/* PAGINATION */}
 
-          <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-[9px] text-slate-400">
-                Show
-              </span>
+<div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
+  {/* LEFT — Show entries */}
+  <div className="flex items-center gap-2">
+    <span className="text-[10px] font-semibold text-slate-500">
+      Show
+    </span>
 
-              <select
-                value={itemsPerPage}
-                onChange={(event) =>
-                  setItemsPerPage(
-                    Number(
-                      event.target.value
-                    )
-                  )
-                }
-                className="h-6 rounded-md border border-slate-200 bg-white px-1.5 text-[9px]"
-              >
-                <option value={10}>
-                  10
-                </option>
+    <select
+      value={itemsPerPage}
+      onChange={(event) =>
+        setItemsPerPage(
+          Number(event.target.value)
+        )
+      }
+      className="h-7 rounded-lg border border-slate-200 bg-white px-2 text-[10px] font-bold text-[#071739] shadow-sm outline-none transition hover:border-blue-300 focus:border-blue-500"
+    >
+      <option value={10}>10</option>
+      <option value={25}>25</option>
+      <option value={50}>50</option>
+      <option value={100}>100</option>
+    </select>
 
-                <option value={25}>
-                  25
-                </option>
+    <span className="text-[10px] font-semibold text-slate-500">
+      entries
+    </span>
+  </div>
 
-                <option value={50}>
-                  50
-                </option>
+  {/* RIGHT — Pagination */}
+  <div className="flex items-center gap-1.5">
+    <button
+      onClick={() =>
+        setCurrentPage((page) =>
+          Math.max(1, page - 1)
+        )
+      }
+      disabled={currentPage === 1}
+      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold text-[#071739] shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      Prev
+    </button>
 
-                <option value={100}>
-                  100
-                </option>
-              </select>
+    <div className="rounded-lg bg-[#071739] px-3 py-1.5 text-[10px] font-extrabold text-white shadow-sm">
+      {currentPage} / {totalPages}
+    </div>
 
-              <span className="text-[9px] text-slate-400">
-                entries
-              </span>
-            </div>
+    <button
+      onClick={() =>
+        setCurrentPage((page) =>
+          Math.min(
+            totalPages,
+            page + 1
+          )
+        )
+      }
+      disabled={
+        currentPage === totalPages
+      }
+      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold text-[#071739] shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      Next
+    </button>
+  </div>
+</div>
 
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() =>
-                  setCurrentPage(
-                    (page) =>
-                      Math.max(
-                        1,
-                        page - 1
-                      )
-                  )
-                }
-                disabled={
-                  currentPage === 1
-                }
-                className="rounded-md border border-slate-200 px-2 py-1 text-[9px] font-semibold disabled:opacity-30"
-              >
-                Prev
-              </button>
-
-              <span className="px-2 text-[9px] font-bold text-slate-500">
-                {currentPage} /{" "}
-                {totalPages}
-              </span>
-
-              <button
-                onClick={() =>
-                  setCurrentPage(
-                    (page) =>
-                      Math.min(
-                        totalPages,
-                        page + 1
-                      )
-                  )
-                }
-                disabled={
-                  currentPage ===
-                  totalPages
-                }
-                className="rounded-md border border-slate-200 px-2 py-1 text-[9px] font-semibold disabled:opacity-30"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        </section>
+</section>
 
         {/* LEAD MODAL */}
 
