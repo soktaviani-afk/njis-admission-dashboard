@@ -5,6 +5,10 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
+/* =========================================================
+   GEMINI CONFIG
+========================================================= */
+
 const apiKey = process.env.GEMINI_API_KEY;
 
 if (!apiKey) {
@@ -17,7 +21,43 @@ const ai = apiKey
     })
   : null;
 
-const MODEL = "gemini-3.8-flash"
+/*
+  Model priority:
+
+  1. Gemini 3.8 Flash
+  2. Gemini 3.7 Flash
+  3. Gemini 3.6 Flash
+  4. Gemini 3.5 Flash
+  5. Gemini 3.5 Flash-Lite
+  6. Gemini 3.1 Flash-Lite
+
+  All are stable Gemini API models.
+*/
+
+const GEMINI_MODELS = [
+  "gemini-3.8-flash",
+  "gemini-3.7-flash",
+  "gemini-3.6-flash",
+  "gemini-3.5-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
+];
+
+/*
+  Number of attempts per model.
+
+  Example:
+  Model 3.8 -> retry once
+  then Model 3.7 -> retry once
+  then Model 3.6 -> retry once
+  ...
+*/
+
+const RETRIES_PER_MODEL = 1;
+
+/* =========================================================
+   DATA SOURCES
+========================================================= */
 
 const ENROLLMENT_URL =
   "https://opensheet.elk.sh/1iBQf0dnRCCOC3NyoNYBDSzDaKHM-gI80XwKtGYMhpDA/MASTER_ENROLLMENT";
@@ -304,7 +344,65 @@ async function getAdmissionsContext() {
 }
 
 /* =========================================================
-   GEMINI HELPER
+   GEMINI ERROR HELPERS
+========================================================= */
+
+function getErrorStatus(error: unknown): number | null {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error
+  ) {
+    const status = (error as { status?: unknown }).status;
+
+    if (typeof status === "number") {
+      return status;
+    }
+  }
+
+  return null;
+}
+
+function isRetryableGeminiError(error: unknown) {
+  const status = getErrorStatus(error);
+
+  /*
+    Retry/fallback for temporary server or rate-limit errors.
+  */
+
+  if (
+    status === 429 ||
+    status === 500 ||
+    status === 502 ||
+    status === 503 ||
+    status === 504
+  ) {
+    return true;
+  }
+
+  const message =
+    error instanceof Error
+      ? error.message.toLowerCase()
+      : String(error).toLowerCase();
+
+  return (
+    message.includes("unavailable") ||
+    message.includes("high demand") ||
+    message.includes("temporarily") ||
+    message.includes("rate limit") ||
+    message.includes("too many requests") ||
+    message.includes("internal server error")
+  );
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) =>
+    setTimeout(resolve, ms)
+  );
+}
+
+/* =========================================================
+   GEMINI HELPER WITH AUTOMATIC FALLBACK
 ========================================================= */
 
 async function generateAIResponse(prompt: string) {
@@ -314,20 +412,101 @@ async function generateAIResponse(prompt: string) {
     );
   }
 
-  const response = await ai.models.generateContent({
-    model: MODEL,
-    contents: prompt,
-  });
+  let lastError: unknown = null;
 
-  const text = response.text;
+  for (const model of GEMINI_MODELS) {
+    for (
+      let attempt = 0;
+      attempt <= RETRIES_PER_MODEL;
+      attempt++
+    ) {
+      try {
+        console.log(
+          `[Enrollment AI] Trying model: ${model} | attempt: ${
+            attempt + 1
+          }`
+        );
 
-  if (!text) {
-    throw new Error(
-      "Gemini returned an empty response."
+        const response =
+          await ai.models.generateContent({
+            model,
+            contents: prompt,
+          });
+
+        const text = response.text;
+
+        if (!text) {
+          throw new Error(
+            `Gemini returned an empty response from ${model}.`
+          );
+        }
+
+        console.log(
+          `[Enrollment AI] Success with model: ${model}`
+        );
+
+        return {
+          text,
+          model,
+        };
+      } catch (error) {
+        lastError = error;
+
+        console.error(
+          `[Enrollment AI] ${model} failed:`,
+          error
+        );
+
+        /*
+          If this is NOT a temporary error,
+          don't waste time trying every model.
+        */
+
+        if (!isRetryableGeminiError(error)) {
+          throw error;
+        }
+
+        /*
+          Small exponential backoff.
+
+          Attempt 1 -> 700ms
+          Attempt 2 -> 1400ms
+        */
+
+        if (attempt < RETRIES_PER_MODEL) {
+          const delay = 700 * (attempt + 1);
+
+          console.log(
+            `[Enrollment AI] Retrying ${model} in ${delay}ms...`
+          );
+
+          await sleep(delay);
+        }
+      }
+    }
+
+    /*
+      Current model failed after retries.
+      Move to the next model.
+    */
+
+    console.warn(
+      `[Enrollment AI] Falling back from ${model}...`
     );
+
+    /*
+      Small delay before switching models.
+    */
+
+    await sleep(300);
   }
 
-  return text;
+  throw (
+    lastError ||
+    new Error(
+      "All Gemini models are currently unavailable."
+    )
+  );
 }
 
 /* =========================================================
@@ -335,7 +514,8 @@ async function generateAIResponse(prompt: string) {
 ========================================================= */
 
 export async function GET() {
-  const checkedAt = new Date().toISOString();
+  const checkedAt =
+    new Date().toISOString();
 
   try {
     if (!ai) {
@@ -343,37 +523,33 @@ export async function GET() {
         {
           status: "unavailable",
           checkedAt,
-          reason: "GEMINI_API_KEY is not configured.",
+          reason:
+            "GEMINI_API_KEY is not configured.",
         },
         { status: 503 }
       );
     }
 
-    const response = await ai.models.generateContent({
-      model: MODEL,
-      contents:
-        "Respond with exactly one word: READY",
-    });
-
-    const text = response.text?.trim();
-
-    if (!text) {
-      throw new Error("Gemini returned an empty health-check response.");
-    }
+    const result =
+      await generateAIResponse(
+        "Respond with exactly one word: READY"
+      );
 
     return NextResponse.json({
       status: "ready",
       checkedAt,
-      model: MODEL,
+      model: result.model,
     });
   } catch (error) {
-    console.error("Gemini AI health check failed:", error);
+    console.error(
+      "Gemini AI health check failed:",
+      error
+    );
 
     return NextResponse.json(
       {
         status: "unavailable",
         checkedAt,
-        model: MODEL,
         reason:
           error instanceof Error
             ? error.message
@@ -388,7 +564,9 @@ export async function GET() {
    POST
 ========================================================= */
 
-export async function POST(request: Request) {
+export async function POST(
+  request: Request
+) {
   try {
     const body = await request.json();
 
@@ -406,7 +584,8 @@ export async function POST(request: Request) {
       ) {
         return NextResponse.json(
           {
-            error: "Please provide a question.",
+            error:
+              "Please provide a question.",
           },
           {
             status: 400,
@@ -419,19 +598,15 @@ export async function POST(request: Request) {
        GET ADMISSIONS DATA
     ===================================================== */
 
-    const context = await getAdmissionsContext();
+    const context =
+      await getAdmissionsContext();
 
-    /*
-      Prevent unnecessarily huge / unsafe prompt construction.
-      The complete operational data is still available to Gemini,
-      but we serialize it consistently.
-    */
-
-    const admissionsData = JSON.stringify(
-      context,
-      null,
-      2
-    );
+    const admissionsData =
+      JSON.stringify(
+        context,
+        null,
+        2
+      );
 
     /* =====================================================
        AI CHAT MODE
@@ -466,6 +641,10 @@ IMPORTANT RULES:
 - Do not return JSON.
 - Use natural language.
 - Do not claim to have information that is not present in the supplied data.
+- Do not use Markdown bold syntax with **.
+- Do not use Markdown heading syntax with #.
+- Prefer clean bullet points and short paragraphs.
+- Make the answer easy for Admissions staff to scan quickly.
 
 AVAILABLE NJIS DATA:
 
@@ -476,10 +655,14 @@ USER QUESTION:
 ${question}
 `;
 
-      const text = await generateAIResponse(prompt);
+      const result =
+        await generateAIResponse(
+          prompt
+        );
 
       return NextResponse.json({
-        answer: text,
+        answer: result.text,
+        model: result.model,
       });
     }
 
@@ -530,7 +713,12 @@ Return ONLY valid JSON in this exact structure:
 }
 `;
 
-    const text = await generateAIResponse(prompt);
+    const result =
+      await generateAIResponse(
+        prompt
+      );
+
+    const text = result.text;
 
     let parsed: {
       summary: string;
@@ -544,7 +732,9 @@ Return ONLY valid JSON in this exact structure:
         .replace(/```/g, "")
         .trim();
 
-      parsed = JSON.parse(cleanedText);
+      parsed = JSON.parse(
+        cleanedText
+      );
     } catch {
       parsed = {
         summary: text,
@@ -554,7 +744,10 @@ Return ONLY valid JSON in this exact structure:
       };
     }
 
-    return NextResponse.json(parsed);
+    return NextResponse.json({
+      ...parsed,
+      model: result.model,
+    });
   } catch (error) {
     console.error(
       "Gemini Admissions AI error:",
