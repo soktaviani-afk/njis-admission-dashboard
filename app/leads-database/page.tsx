@@ -90,6 +90,12 @@ export default function LeadsDatabase() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
 
+  /*
+   * ============================
+   * AI SALES ASSISTANT
+   * ============================
+   */
+
   async function askLeadAI(question?: string) {
     const finalQuestion =
       question || aiQuestion.trim();
@@ -125,7 +131,7 @@ export default function LeadsDatabase() {
       }
 
       setAiAnswer(
-        data.answer ||
+        data?.answer ||
           "Information unavailable."
       );
     } catch (error) {
@@ -142,9 +148,17 @@ export default function LeadsDatabase() {
     }
   }
 
+  /*
+   * ============================
+   * FETCH LEADS
+   * ============================
+   */
+
   useEffect(() => {
     async function fetchLeads() {
       try {
+        setLoading(true);
+
         const response = await fetch(
           "https://opensheet.elk.sh/1Oa4Jrpwz7C4YDbtL8ztMT4NzZ9JLpiHz26ZLtQewyLU/INQUIRY%20FORM"
         );
@@ -155,8 +169,7 @@ export default function LeadsDatabase() {
           );
         }
 
-        const data =
-          await response.json();
+        const data = await response.json();
 
         setLeads(
           Array.isArray(data)
@@ -186,6 +199,12 @@ export default function LeadsDatabase() {
       clearInterval(interval);
   }, []);
 
+  /*
+   * ============================
+   * RESET PAGINATION
+   * ============================
+   */
+
   useEffect(() => {
     setCurrentPage(1);
   }, [
@@ -195,6 +214,12 @@ export default function LeadsDatabase() {
     itemsPerPage,
   ]);
 
+  /*
+   * ============================
+   * FILTER OPTIONS
+   * ============================
+   */
+
   const picOptions = useMemo(() => {
     const values = leads
       .map((lead) => lead.PIC)
@@ -202,7 +227,9 @@ export default function LeadsDatabase() {
 
     return [
       "All PIC",
-      ...Array.from(new Set(values)),
+      ...Array.from(
+        new Set(values)
+      ),
     ];
   }, [leads]);
 
@@ -213,21 +240,33 @@ export default function LeadsDatabase() {
           lead.Timestamp
         );
 
-        return Number.isNaN(
-          date.getTime()
-        )
-          ? ""
-          : date
-              .getFullYear()
-              .toString();
+        if (
+          Number.isNaN(
+            date.getTime()
+          )
+        ) {
+          return "";
+        }
+
+        return date
+          .getFullYear()
+          .toString();
       })
       .filter(Boolean);
 
     return [
       "All Years",
-      ...Array.from(new Set(years)),
+      ...Array.from(
+        new Set(years)
+      ),
     ];
   }, [leads]);
+
+  /*
+   * ============================
+   * FILTERED LEADS
+   * ============================
+   */
 
   const filteredLeads = useMemo(() => {
     const query =
@@ -251,7 +290,9 @@ export default function LeadsDatabase() {
       );
 
       const leadYear =
-        Number.isNaN(date.getTime())
+        Number.isNaN(
+          date.getTime()
+        )
           ? ""
           : date
               .getFullYear()
@@ -274,6 +315,12 @@ export default function LeadsDatabase() {
     selectedYear,
   ]);
 
+  /*
+   * ============================
+   * PAGINATION
+   * ============================
+   */
+
   const totalPages = Math.max(
     1,
     Math.ceil(
@@ -283,7 +330,8 @@ export default function LeadsDatabase() {
   );
 
   const indexOfLastLead =
-    currentPage * itemsPerPage;
+    currentPage *
+    itemsPerPage;
 
   const indexOfFirstLead =
     indexOfLastLead -
@@ -295,11 +343,18 @@ export default function LeadsDatabase() {
       indexOfLastLead
     );
 
+  /*
+   * ============================
+   * KPI
+   * ============================
+   */
+
   const convertedLeads =
     filteredLeads.filter(
       (lead) =>
         String(lead.Converted)
-          .toLowerCase() === "yes"
+          .toLowerCase() ===
+        "yes"
     ).length;
 
   const conversionRate =
@@ -327,6 +382,12 @@ export default function LeadsDatabase() {
         lead.PIC.trim() === ""
     ).length;
 
+  /*
+   * ============================
+   * SOURCE CHART
+   * ============================
+   */
+
   const sourceData = useMemo(() => {
     const counts: Record<
       string,
@@ -347,9 +408,16 @@ export default function LeadsDatabase() {
         value,
       }))
       .sort(
-        (a, b) => b.value - a.value
+        (a, b) =>
+          b.value - a.value
       );
   }, [filteredLeads]);
+
+  /*
+   * ============================
+   * PIC PERFORMANCE
+   * ============================
+   */
 
   const picPerformance = useMemo(() => {
     const counts: Record<
@@ -371,9 +439,16 @@ export default function LeadsDatabase() {
         value,
       }))
       .sort(
-        (a, b) => b.value - a.value
+        (a, b) =>
+          b.value - a.value
       );
   }, [filteredLeads]);
+
+  /*
+   * ============================
+   * FOLLOW-UP HELPERS
+   * ============================
+   */
 
   function getDaysSince(
     timestamp: string
@@ -452,83 +527,90 @@ export default function LeadsDatabase() {
       )
       .slice(0, 6);
 
+  /*
+   * ============================
+   * PAGE
+   * ============================
+   */
+
   return (
     <div
-      className={`${jakarta.className} flex h-screen overflow-hidden bg-gradient-to-br from-white via-slate-50 to-slate-100`}
+      className={`${jakarta.className} min-h-screen overflow-x-hidden bg-gradient-to-br from-white via-slate-50 to-slate-100`}
     >
       <Sidebar />
 
-      <main className="flex min-w-0 flex-1 flex-col overflow-hidden p-3 lg:p-4">
+      <main className="min-h-screen min-w-0 flex-1 overflow-visible p-3 lg:p-5">
         {/* HEADER */}
-        <div className="shrink-0">
-          <Topbar
-            title="Leads Database"
-            subtitle="Centralized lead management system for admissions sales, follow-up tracking, and conversion monitoring."
+
+        <Topbar
+          title="Leads Database"
+          subtitle="Centralized lead management system for admissions sales, follow-up tracking, and conversion monitoring."
+        />
+
+        {/* FILTERS */}
+
+        <div className="mt-3 flex flex-wrap justify-end gap-2">
+          <input
+            type="text"
+            placeholder="Search lead..."
+            value={search}
+            onChange={(e) =>
+              setSearch(
+                e.target.value
+              )
+            }
+            className="h-9 w-48 rounded-xl border border-slate-200 bg-white px-3 text-xs text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
           />
 
-          {/* FILTERS */}
-          <div className="mt-2 flex flex-wrap justify-end gap-2">
-            <input
-              type="text"
-              placeholder="Search lead..."
-              value={search}
-              onChange={(e) =>
-                setSearch(
-                  e.target.value
-                )
-              }
-              className="h-8 w-48 rounded-lg border border-slate-200 bg-white px-3 text-xs text-[#071739] shadow-sm outline-none focus:border-blue-500"
-            />
+          <select
+            value={selectedPIC}
+            onChange={(e) =>
+              setSelectedPIC(
+                e.target.value
+              )
+            }
+            className="h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
+          >
+            {picOptions.map(
+              (pic) => (
+                <option
+                  key={pic}
+                  value={pic}
+                >
+                  {pic}
+                </option>
+              )
+            )}
+          </select>
 
-            <select
-              value={selectedPIC}
-              onChange={(e) =>
-                setSelectedPIC(
-                  e.target.value
-                )
-              }
-              className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-[#071739] shadow-sm outline-none focus:border-blue-500"
-            >
-              {picOptions.map(
-                (pic) => (
-                  <option
-                    key={pic}
-                    value={pic}
-                  >
-                    {pic}
-                  </option>
-                )
-              )}
-            </select>
-
-            <select
-              value={selectedYear}
-              onChange={(e) =>
-                setSelectedYear(
-                  e.target.value
-                )
-              }
-              className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-[#071739] shadow-sm outline-none focus:border-blue-500"
-            >
-              {yearOptions.map(
-                (year) => (
-                  <option
-                    key={year}
-                    value={year}
-                  >
-                    {year}
-                  </option>
-                )
-              )}
-            </select>
-          </div>
+          <select
+            value={selectedYear}
+            onChange={(e) =>
+              setSelectedYear(
+                e.target.value
+              )
+            }
+            className="h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
+          >
+            {yearOptions.map(
+              (year) => (
+                <option
+                  key={year}
+                  value={year}
+                >
+                  {year}
+                </option>
+              )
+            )}
+          </select>
         </div>
 
-        {/* AI ASSISTANT */}
-        <section className="mt-2 shrink-0 rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-3 shadow-sm">
+        {/* AI SALES ASSISTANT */}
+
+        <section className="mt-3 rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-3 shadow-sm">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
+              <div>
                 <p className="text-[9px] font-extrabold uppercase tracking-[0.22em] text-blue-600">
                   AI Sales Assistant
                 </p>
@@ -538,7 +620,7 @@ export default function LeadsDatabase() {
                 </h3>
               </div>
 
-              <p className="hidden max-w-xl text-right text-[10px] text-slate-500 xl:block">
+              <p className="hidden text-right text-[10px] text-slate-500 xl:block">
                 Ask about follow-ups,
                 lead sources, PIC
                 performance, and
@@ -614,7 +696,7 @@ export default function LeadsDatabase() {
             )}
 
             {aiAnswer && (
-              <div className="max-h-24 overflow-y-auto rounded-lg border border-blue-100 bg-white px-3 py-2 shadow-sm">
+              <div className="max-h-28 overflow-y-auto rounded-lg border border-blue-100 bg-white px-3 py-2 shadow-sm">
                 <p className="text-[9px] font-extrabold uppercase tracking-wider text-blue-600">
                   AI Response
                 </p>
@@ -628,7 +710,8 @@ export default function LeadsDatabase() {
         </section>
 
         {/* KPI */}
-        <section className="mt-2 grid shrink-0 grid-cols-5 gap-2">
+
+        <section className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
           <CompactStat
             title="Total Leads"
             value={
@@ -682,25 +765,28 @@ export default function LeadsDatabase() {
         </section>
 
         {/* ANALYTICS */}
-        <section className="mt-2 grid shrink-0 grid-cols-2 gap-2">
+
+        <section className="mt-2 grid grid-cols-1 gap-2 lg:grid-cols-2">
           {/* SOURCE */}
-          <div className="h-[145px] rounded-2xl border border-white/70 bg-white/80 p-2 shadow-sm backdrop-blur-xl">
+
+          <div className="min-w-0 rounded-2xl border border-white/70 bg-white/80 p-2 shadow-sm backdrop-blur-xl">
             <h3 className="text-xs font-extrabold text-[#071739]">
               Lead Sources
             </h3>
 
-            <div className="flex h-[115px] items-center justify-center">
-              {sourceData.length > 0 ? (
+            <div className="flex h-[130px] items-center justify-center">
+              {sourceData.length >
+              0 ? (
                 <PieChart
-                  width={220}
-                  height={120}
+                  width={240}
+                  height={130}
                 >
                   <Pie
                     data={sourceData}
                     cx="50%"
                     cy="50%"
-                    outerRadius={42}
-                    innerRadius={25}
+                    outerRadius={46}
+                    innerRadius={27}
                     dataKey="value"
                     paddingAngle={2}
                   >
@@ -732,18 +818,21 @@ export default function LeadsDatabase() {
             </div>
           </div>
 
-          {/* PIC */}
-          <div className="h-[145px] rounded-2xl border border-white/70 bg-white/80 p-2 shadow-sm backdrop-blur-xl">
+          {/* PIC PERFORMANCE */}
+
+          <div className="min-w-0 rounded-2xl border border-white/70 bg-white/80 p-2 shadow-sm backdrop-blur-xl">
             <h3 className="text-xs font-extrabold text-[#071739]">
               PIC Performance
             </h3>
 
-            <div className="mt-1 h-[115px]">
+            <div className="mt-1 h-[130px] min-w-0">
               {picPerformance.length >
               0 ? (
                 <ResponsiveContainer
                   width="100%"
                   height="100%"
+                  minWidth={0}
+                  minHeight={0}
                 >
                   <BarChart
                     data={
@@ -751,7 +840,7 @@ export default function LeadsDatabase() {
                     }
                     margin={{
                       top: 5,
-                      right: 8,
+                      right: 5,
                       left: -25,
                       bottom: 0,
                     }}
@@ -792,8 +881,9 @@ export default function LeadsDatabase() {
           </div>
         </section>
 
-        {/* PRIORITY */}
-        <section className="mt-2 shrink-0 rounded-2xl border border-white/70 bg-white/80 p-2 shadow-sm backdrop-blur-xl">
+        {/* PRIORITY FOLLOW UPS */}
+
+        <section className="mt-2 rounded-2xl border border-white/70 bg-white/80 p-2 shadow-sm backdrop-blur-xl">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xs font-extrabold text-[#071739]">
@@ -814,7 +904,7 @@ export default function LeadsDatabase() {
 
           {priorityLeads.length >
           0 ? (
-            <div className="mt-1.5 grid grid-cols-3 gap-1.5">
+            <div className="mt-1.5 grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
               {priorityLeads.map(
                 (
                   lead,
@@ -879,8 +969,9 @@ export default function LeadsDatabase() {
         </section>
 
         {/* LEADS DATABASE */}
-        <section className="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-white/70 bg-white/80 p-2 shadow-sm backdrop-blur-xl">
-          <div className="flex shrink-0 items-center justify-between gap-3">
+
+        <section className="mt-2 rounded-2xl border border-white/70 bg-white/80 p-2 shadow-sm backdrop-blur-xl">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="text-sm font-extrabold text-[#071739]">
                 Leads Database
@@ -898,8 +989,9 @@ export default function LeadsDatabase() {
             </span>
           </div>
 
-          {/* TABLE SCROLLS, NOT THE PAGE */}
-          <div className="mt-1.5 min-h-0 flex-1 overflow-auto rounded-lg border border-slate-200 bg-white">
+          {/* TABLE SCROLL ONLY */}
+
+          <div className="mt-1.5 max-h-[420px] overflow-auto rounded-lg border border-slate-200 bg-white">
             <table className="min-w-full text-[10px]">
               <thead className="sticky top-0 z-10">
                 <tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-500">
@@ -1047,7 +1139,8 @@ export default function LeadsDatabase() {
           </div>
 
           {/* PAGINATION */}
-          <div className="mt-1.5 flex shrink-0 items-center justify-between gap-2">
+
+          <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="text-[9px] text-slate-400">
                 Show
@@ -1133,6 +1226,7 @@ export default function LeadsDatabase() {
         </section>
 
         {/* LEAD MODAL */}
+
         {selectedLead && (
           <LeadModal
             lead={selectedLead}
@@ -1147,6 +1241,12 @@ export default function LeadsDatabase() {
     </div>
   );
 }
+
+/*
+ * ============================
+ * COMPACT KPI
+ * ============================
+ */
 
 function CompactStat({
   title,
@@ -1167,6 +1267,12 @@ function CompactStat({
     </div>
   );
 }
+
+/*
+ * ============================
+ * LEAD MODAL
+ * ============================
+ */
 
 function LeadModal({
   lead,
@@ -1208,7 +1314,8 @@ function LeadModal({
           e.stopPropagation()
         }
       >
-        {/* MODAL HEADER */}
+        {/* HEADER */}
+
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-blue-600">
@@ -1233,6 +1340,7 @@ function LeadModal({
         </div>
 
         {/* BASIC INFORMATION */}
+
         <div className="mt-5 grid grid-cols-2 gap-2 md:grid-cols-3">
           <LeadDetailCard
             title="Source"
@@ -1301,6 +1409,7 @@ function LeadModal({
         </div>
 
         {/* PARENTS */}
+
         <div className="mt-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
           <div className="rounded-2xl bg-slate-50 p-4">
             <h3 className="text-sm font-extrabold text-[#071739]">
@@ -1374,6 +1483,7 @@ function LeadModal({
         </div>
 
         {/* NOTES */}
+
         <div className="mt-5 rounded-2xl bg-slate-50 p-4">
           <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
             Reasons / Notes
@@ -1388,6 +1498,12 @@ function LeadModal({
     </div>
   );
 }
+
+/*
+ * ============================
+ * DETAIL CARD
+ * ============================
+ */
 
 function LeadDetailCard({
   title,
