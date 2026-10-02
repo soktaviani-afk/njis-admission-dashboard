@@ -146,6 +146,64 @@ export default function LeadsDatabase() {
   setItemsPerPage,
 ] = useState(10);
 
+const [aiQuestion, setAiQuestion] = useState("");
+const [aiAnswer, setAiAnswer] = useState("");
+const [aiLoading, setAiLoading] = useState(false);
+const [aiError, setAiError] = useState("");
+
+async function askLeadAI(question?: string) {
+  const finalQuestion =
+    question || aiQuestion.trim();
+
+  if (!finalQuestion) return;
+
+  try {
+    setAiLoading(true);
+    setAiError("");
+    setAiAnswer("");
+
+    const response = await fetch(
+      "/api/leads-ai",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          question: finalQuestion,
+          leads: filteredLeads,
+        }),
+      }
+    );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data?.error ||
+          "Unable to generate AI response."
+      );
+    }
+
+    setAiAnswer(
+      data.answer ||
+        "Information unavailable."
+    );
+  } catch (error) {
+    console.error(
+      "Lead AI request failed:",
+      error
+    );
+
+    setAiError(
+      "The AI service is temporarily unavailable. Please try again shortly."
+    );
+  } finally {
+    setAiLoading(false);
+  }
+}
 
   useEffect(() => {
     async function fetchLeads() {
@@ -523,6 +581,93 @@ const picPerformance =
   </select>
 </div>
 </div>
+
+<section className="mt-8 rounded-[32px] border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-8 shadow-[0_20px_60px_rgba(37,99,235,0.10)]">
+  <div className="flex flex-col gap-6">
+    <div>
+      <p className="text-xs font-extrabold uppercase tracking-[0.25em] text-blue-600">
+        AI Sales Assistant
+      </p>
+
+      <h3 className="mt-2 text-3xl font-extrabold text-[#071739]">
+        Ask your leads
+      </h3>
+
+      <p className="mt-2 max-w-2xl text-slate-500">
+        Ask questions about your current filtered leads,
+        follow-ups, sources, PIC performance, and conversion.
+      </p>
+    </div>
+
+    <div className="flex flex-col gap-3 lg:flex-row">
+      <input
+        type="text"
+        value={aiQuestion}
+        onChange={(event) =>
+          setAiQuestion(event.target.value)
+        }
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            askLeadAI();
+          }
+        }}
+        placeholder="Ask: Which leads need follow-up?"
+        className="h-14 flex-1 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-medium text-[#071739] shadow-sm outline-none transition focus:border-blue-500"
+      />
+
+      <button
+        onClick={() => askLeadAI()}
+        disabled={
+          aiLoading ||
+          !aiQuestion.trim()
+        }
+        className="h-14 rounded-2xl bg-[#071739] px-7 text-sm font-extrabold text-white shadow-lg transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {aiLoading
+          ? "Thinking..."
+          : "Ask AI"}
+      </button>
+    </div>
+
+    <div className="flex flex-wrap gap-2">
+      {[
+        "Which leads need follow-up?",
+        "Which leads have been idle the longest?",
+        "Which source has the best conversion?",
+        "Summarize our current leads.",
+      ].map((question) => (
+        <button
+          key={question}
+          onClick={() =>
+            askLeadAI(question)
+          }
+          disabled={aiLoading}
+          className="rounded-full border border-blue-100 bg-white px-4 py-2 text-xs font-bold text-blue-700 transition hover:bg-blue-50 disabled:opacity-50"
+        >
+          {question}
+        </button>
+      ))}
+    </div>
+
+    {aiError && (
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-semibold text-red-700">
+        {aiError}
+      </div>
+    )}
+
+    {aiAnswer && (
+      <div className="rounded-[24px] border border-blue-100 bg-white p-6 shadow-sm">
+        <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-blue-600">
+          AI Response
+        </p>
+
+        <div className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-700">
+          {aiAnswer}
+        </div>
+      </div>
+    )}
+  </div>
+</section>
 
         {/* KPI */}
         {loading ? (
