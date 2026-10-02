@@ -330,8 +330,8 @@ export default function StudentExit() {
               "application/json",
           },
           body: JSON.stringify({
-            question,
-            students: searchedData,
+          question,
+          exitRecords: searchedData,
           }),
         }
       );
