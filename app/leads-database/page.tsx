@@ -535,11 +535,11 @@ export default function LeadsDatabase() {
 
   return (
     <div
-      className={`${jakarta.className} min-h-screen overflow-x-hidden bg-gradient-to-br from-white via-slate-50 to-slate-100`}
-    >
-      <Sidebar />
+  className={`${jakarta.className} flex h-screen overflow-hidden bg-gradient-to-br from-white via-slate-50 to-slate-100`}
+>
+  <Sidebar />
 
-      <main className="min-h-screen min-w-0 flex-1 overflow-visible p-3 lg:p-5">
+  <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-3 lg:p-5">
         {/* HEADER */}
 
         <Topbar
