@@ -79,8 +79,9 @@ export default function StudentExit() {
   const [selectedYear, setSelectedYear] =
     useState("All Years");
 
-  const [search, setSearch] =
-    useState("");
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     const isAuthenticated =
@@ -150,17 +151,23 @@ export default function StudentExit() {
             ] === selectedYear
         );
 
-  const searchedData =
-    filteredData.filter(
-      (student) =>
-        student[
-          "Student Name"
-        ]
-          ?.toLowerCase()
-          .includes(
-            search.toLowerCase()
-          )
-    );
+  const searchedData = filteredData.filter((student) =>
+    student["Student Name"]?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalPages = Math.max(1, Math.ceil(searchedData.length / ITEMS_PER_PAGE));
+  const paginatedData = searchedData.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedYear]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
 
   const gradeData = Object.entries(
     searchedData.reduce(
@@ -614,7 +621,7 @@ const percentage =
       </thead>
 
       <tbody>
-        {searchedData.map(
+        {paginatedData.map(
           (student, index) => (
             <tr
               key={index}
@@ -663,6 +670,44 @@ const percentage =
         )}
       </tbody>
     </table>
+  </div>
+
+  <div className="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+    <p className="text-xs font-semibold text-slate-500">
+      Showing {searchedData.length === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, searchedData.length)} of {searchedData.length} records
+    </p>
+    <div className="flex items-center gap-1.5">
+      <button
+        type="button"
+        onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+        disabled={currentPage === 1}
+        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        Previous
+      </button>
+      {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+        <button
+          key={page}
+          type="button"
+          onClick={() => setCurrentPage(page)}
+          className={`h-9 min-w-9 rounded-xl px-3 text-xs font-bold transition ${
+            currentPage === page
+              ? "bg-[#071739] text-white"
+              : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+          }`}
+        >
+          {page}
+        </button>
+      ))}
+      <button
+        type="button"
+        onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+        disabled={currentPage === totalPages}
+        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        Next
+      </button>
+    </div>
   </div>
 </section>
 
