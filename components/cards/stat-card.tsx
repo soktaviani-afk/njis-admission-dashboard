@@ -10,6 +10,7 @@ type StatCardProps = {
   subtitle?: string;
 
   icon?: LucideIcon;
+  valueClassName?: string;
 };
 
 export default function StatCard({
@@ -17,6 +18,7 @@ export default function StatCard({
   value,
   subtitle,
   icon: Icon,
+  valueClassName = "text-4xl xl:text-4xl",
 }: StatCardProps) {
   return (
     <div className="group relative overflow-hidden rounded-[32px] border border-white/70 bg-white/85 p-7 shadow-[0_15px_50px_rgba(15,23,42,0.06)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_25px_70px_rgba(15,23,42,0.10)]">
@@ -30,7 +32,7 @@ export default function StatCard({
             {title}
           </p>
 
-          <h3 className="mt-5 break-words text-3xl font-extrabold leading-tight tracking-tight text-[#071739] xl:text-5xl">
+          <h3 className={`mt-4 break-words font-extrabold leading-tight tracking-tight text-[#071739] ${valueClassName}`}>
             {value}
           </h3>
         </div>
